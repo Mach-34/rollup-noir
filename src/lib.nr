@@ -7,10 +7,23 @@ struct BalanceLeaf {
     tokenType: Field
 }
 
+struct TxLeaf {
+    from: [Field; 2],
+    fromIndex: Field,
+    to: [Field; 2],
+    toIndex: Field,
+    nonce: Field,
+    amount: Field,
+    tokenType: Field
+}
+
 fn BalanceLeafHash(leaf: BalanceLeaf) -> Field {
     std::hash::poseidon::bn254::hash_5([leaf.pubkey[0], leaf.pubkey[1], leaf.balance, leaf.nonce, leaf.tokenType])
 }
 
+fn TxLeafHash(leaf: TxLeaf) -> Field {
+    std::hash::poseidon::bn254::hash_9([leaf.from[0], leaf.from[1], leaf.fromIndex, leaf.to[0], leaf.to[1], leaf.toIndex, leaf.nonce, leaf.amount, leaf.tokenType])
+}
 
 #[test]
 fn balance_leaf_smoke() {
@@ -22,4 +35,19 @@ fn balance_leaf_smoke() {
     };
     let hash = BalanceLeafHash(leaf);
     assert(hash == 0x0dab9449e4a1398a15224c0b15a49d598b2174d305a316c918125f8feeb123c0);
+}
+
+#[test]
+fn tx_leaf_smoke() {
+    let leaf = TxLeaf {
+        from: [1, 2],
+        fromIndex: 3,
+        to: [4, 5],
+        toIndex: 6,
+        nonce: 7,
+        amount: 8000000,
+        tokenType: 9
+    };
+    let hash = TxLeafHash(leaf);
+    assert(hash == 0x27f1124b9b7e3b51c5bf70769996734beda148b6c4db91a155cf546a9ac279e0);
 }
