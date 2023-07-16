@@ -69,3 +69,32 @@ fn tx_leaf_smoke() {
     let hash = tx_leaf_hash(leaf);
     assert(hash == 0x27f1124b9b7e3b51c5bf70769996734beda148b6c4db91a155cf546a9ac279e0);
 }
+
+#[test]
+fn tx_leaf_hash_smoke() {
+    let leaf = TxLeaf {
+        from: [1, 2],
+        fromIndex: 3,
+        to: [4, 5],
+        toIndex: 6,
+        nonce: 7,
+        amount: 8,
+        tokenType: 9
+    };
+    let hash = tx_leaf_hash(leaf);
+    let expected_hash = 13589767895268936107593642967621470491511464502761040466226072462545218539640;
+    assert(hash == expected_hash);
+}
+
+#[test]
+fn balance_leaf_hash_smoke() {
+    let leaf = BalanceLeaf {
+        pubkey: [1, 2],
+        balance: 3,
+        nonce: 4,
+        tokenType: 5
+    };
+    let hash = balance_leaf_hash(leaf);
+    let expected_hash = 6183221330272524995739186171720101788151706631170188140075976616310159254464;
+    assert(hash == expected_hash);
+}
