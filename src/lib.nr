@@ -17,12 +17,35 @@ struct TxLeaf {
     tokenType: Field
 }
 
+// hardcoded to 4 for now
+struct InclusionProof {
+    root: Field,
+    index: Field,
+    path: [Field; 4]
+}
+
 fn BalanceLeafHash(leaf: BalanceLeaf) -> Field {
     std::hash::poseidon::bn254::hash_5([leaf.pubkey[0], leaf.pubkey[1], leaf.balance, leaf.nonce, leaf.tokenType])
 }
 
 fn TxLeafHash(leaf: TxLeaf) -> Field {
     std::hash::poseidon::bn254::hash_9([leaf.from[0], leaf.from[1], leaf.fromIndex, leaf.to[0], leaf.to[1], leaf.toIndex, leaf.nonce, leaf.amount, leaf.tokenType])
+}
+
+fn BalanceLeafExists(leaf: BalanceLeaf, proof: InclusionProof) {
+    // get hash
+    let leafHash = BalanceLeafHash(leaf);
+    // check hash exists in tree
+    let root = std::merkle::compute_merkle_root(leafHash, proof.index, proof.path);
+    assert(root == proof.root);
+}
+
+fn TxLeafExists(leaf: TxLeaf, proof: InclusionProof) {
+    // get hash
+    let leafHash = TxLeafHash(leaf);
+    // check hash exists in tree
+    let root = std::merkle::compute_merkle_root(leafHash, proof.index, proof.path);
+    assert(root == proof.root);
 }
 
 #[test]
