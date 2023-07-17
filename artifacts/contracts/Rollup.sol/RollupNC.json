@@ -1,0 +1,362 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "RollupNC",
+  "sourceName": "contracts/Rollup.sol",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "oldRoot",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newRoot",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint8",
+          "name": "numAdded",
+          "type": "uint8"
+        }
+      ],
+      "name": "ConfirmDeposit",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "tokenType",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "tokenContract",
+          "type": "address"
+        }
+      ],
+      "name": "RegisteredToken",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256[2]",
+          "name": "pubkey",
+          "type": "uint256[2]"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "tokenType",
+          "type": "uint256"
+        }
+      ],
+      "name": "RequestDeposit",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "currentRoot",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "oldRoot",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "txRoot",
+          "type": "uint256"
+        }
+      ],
+      "name": "UpdatedState",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "leaf",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "recipient",
+          "type": "address"
+        }
+      ],
+      "name": "Withdrawn",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "ZERO",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "balDepth",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "coordinator",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "currentRoot",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "depositQueueEnd",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "depositQueueSize",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "depositQueueStart",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "depositSubtreeHeight",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "deposits",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "pendingDeposits",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "registry",
+      "outputs": [
+        {
+          "internalType": "contract ITokenRegistry",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "txDepth",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "updateNumber",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "updates",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "withdraws",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "zeroCache",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x608060405234801561001057600080fd5b506102dc806100206000396000f3fe608060405234801561001057600080fd5b50600436106101005760003560e01c806367ef678511610097578063b02c43d011610066578063b02c43d014610210578063b4c2f72714610230578063c34ca64114610250578063fdab463d1461026357600080fd5b806367ef6785146101c75780637b103999146101d45780639be7e83f146101e7578063a7932794146101f057600080fd5b8063412964ea116100d3578063412964ea14610179578063426bf3941461018257806355466c371461018b57806358fa63ca146101be57600080fd5b80630a009097146101055780631b6a2481146101355780632882dd981461014c5780633081010214610170575b600080fd5b600754610118906001600160a01b031681565b6040516001600160a01b0390911681526020015b60405180910390f35b61013e600b5481565b60405190815260200161012c565b600a5461015e90610100900460ff1681565b60405160ff909116815260200161012c565b61013e60095481565b61013e60035481565b61013e60085481565b6101ae61019936600461028d565b600e6020526000908152604090205460ff1681565b604051901515815260200161012c565b61013e60045481565b600a5461015e9060ff1681565b600154610118906001600160a01b031681565b61013e60025481565b61013e6101fe36600461028d565b60006020819052908152604090205481565b61013e61021e36600461028d565b600c6020526000908152604090205481565b61013e61023e36600461028d565b600d6020526000908152604090205481565b61013e61025e36600461028d565b61026c565b61013e60065481565b6005818154811061027c57600080fd5b600091825260209091200154905081565b60006020828403121561029f57600080fd5b503591905056fea2646970667358221220579bdcc5b539f0949d0c85b0026c63ea31a2fa8f094b692bcaba7a044824693164736f6c63430008130033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106101005760003560e01c806367ef678511610097578063b02c43d011610066578063b02c43d014610210578063b4c2f72714610230578063c34ca64114610250578063fdab463d1461026357600080fd5b806367ef6785146101c75780637b103999146101d45780639be7e83f146101e7578063a7932794146101f057600080fd5b8063412964ea116100d3578063412964ea14610179578063426bf3941461018257806355466c371461018b57806358fa63ca146101be57600080fd5b80630a009097146101055780631b6a2481146101355780632882dd981461014c5780633081010214610170575b600080fd5b600754610118906001600160a01b031681565b6040516001600160a01b0390911681526020015b60405180910390f35b61013e600b5481565b60405190815260200161012c565b600a5461015e90610100900460ff1681565b60405160ff909116815260200161012c565b61013e60095481565b61013e60035481565b61013e60085481565b6101ae61019936600461028d565b600e6020526000908152604090205460ff1681565b604051901515815260200161012c565b61013e60045481565b600a5461015e9060ff1681565b600154610118906001600160a01b031681565b61013e60025481565b61013e6101fe36600461028d565b60006020819052908152604090205481565b61013e61021e36600461028d565b600c6020526000908152604090205481565b61013e61023e36600461028d565b600d6020526000908152604090205481565b61013e61025e36600461028d565b61026c565b61013e60065481565b6005818154811061027c57600080fd5b600091825260209091200154905081565b60006020828403121561029f57600080fd5b503591905056fea2646970667358221220579bdcc5b539f0949d0c85b0026c63ea31a2fa8f094b692bcaba7a044824693164736f6c63430008130033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

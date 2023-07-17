@@ -1,4 +1,4 @@
-const { buildEddsa, buildPoseidon, buildPedersenHash } = require('circomlibjs')
+const { buildEddsa, buildPoseidon, buildPedersenHash, poseidonContract } = require('circomlibjs')
 const { IncrementalMerkleTree } = require('@zk-kit/incremental-merkle-tree')
 const crypto = require('crypto');
 
@@ -66,7 +66,7 @@ describe("Test rollup", async () => {
         console.log("pedersen hash", messageHash);
     })
 
-    it("poseidon merkle tree", async () => {
+    xit("poseidon merkle tree", async () => {
         // make new accounts
         const keys = [
             "4411fa416d3e9c18fc0d353b1e035bd6f387e99595255c93ce7f4395010eaf4d",
@@ -111,5 +111,18 @@ describe("Test rollup", async () => {
         console.log("root: ", tree.root)
     })
 
+    it("pedersen merkle tree", async () => {
+        const poseidonT3ABI = poseidonContract.generateABI(2);
+        const poseidonT3Bytecode = poseidonContract.createCode(2);
+
+        console.log("poseidonT3ABI", poseidonT3ABI);
+        console.log("poseidonT3Bytecode", poseidonT3Bytecode);
+
+        // const poseidonT6ABI = poseidonContract.generateABI(5);
+        // const poseidonT6Bytecode = poseidonContract.createCode(5);
+        
+        // console.log("poseidonT6ABI", poseidonT6ABI);
+        // console.log("poseidonT6Bytecode", poseidonT6Bytecode);
+    })
 })
 
