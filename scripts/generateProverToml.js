@@ -75,110 +75,99 @@ const numToHex = (num) => {
   tree.update(2, newSenderLeafHash);
   // get intermediate proof for state change 1
   let intermediateRoot = tree.root;
-  let senderPath = tree.createProof(2).siblings.map(sibling => sibling[0]);
+  let senderPath = tree.createProof(2).siblings.map(sibling => numToHex(sibling[0]));
   // compute receiver changed leaf
   let newReceiverLeaf = [
     ...accounts[0].pub,
     BigInt(100 - 100),
-    BigInt(0),
+    BigInt(1),
     BigInt(1),
   ]
   let newReceiverLeafHash = F.toObject(poseidon(newReceiverLeaf));
   tree.update(1, newReceiverLeafHash);
   // get new root for state change 1
   let newRoot = tree.root;
-  let receiverPath = tree.createProof(1).siblings.map(sibling => sibling[0]);
+  let receiverPath = tree.createProof(1).siblings.map(sibling => numToHex(sibling[0]));
 
-  // // get merkle proof for leaf 2
-  // const index = 2;
-  // let proof = tree.createProof(index);
-  // let path = proof.siblings.map((sibling) => sibling[0]);
+  input = {
+    from: [], // array of sender eddsa keys
+    to: [], // array of receiver eddsa keys x
+    amount: [], // array of L2 transaction values
+    fromIndex: [], // array of sender index in balance tree
+    fromNonce: [], // array of sender nonce for tx
+    fromTokenType: [], // array of sender token types
+    // signature: [], // array of signatures by sender eddsa key on tx data
+    fromBalance: [], // array of sender balances
+    toNonce: [], // array of receiver nonce in bal tree
+    toBalance: [],
+    toTokenType: [],
+    // txPath: [],
+    fromPath: [],
+    toPath: [],
+    // txRoot: undefined,
+    prevRoot: undefined,
+    nextRoot: undefined
+  }
 
-  // const toIndex = 1;
-  // let proofTo = tree.createProof(toIndex);
-  // let pathTo = proofTo.siblings.map((sibling) => sibling[0]);
+  input.from.push(accounts[1].pub.map(point => numToHex(point)));
+  input.to.push(accounts[1].pub.map(point => numToHex(point)));
+  input.amount.push(100);
+  input.fromIndex.push(2);
+  input.fromNonce.push(0);
+  input.fromTokenType.push(1);
+  // input.signature.push(0);
+  input.fromBalance.push(200);
+  input.toNonce.push(1);
+  input.toBalance.push(100);
+  input.toTokenType.push(1);
+  input.fromPath.push(senderPath);
+  input.toPath.push(receiverPath);
+  input.prevRoot = numToHex(oldRoot);
+  input.nextRoot = numToHex(newRoot);
 
-  // // log used variables in poseidon merkle smoke test
-  // //   console.log('account', accounts[1]);
-  // //   console.log('hash: ', F.toObject(hashes[2]));
-  // //   console.log('proof path: ', path);
-  // //   console.log('index: 2');
-  // //   console.log('root: ', tree.root);
-  // const amount = 50;
-  // //   const amount = `0x${Buffer.from(numToHex(50), 'hex').toString('hex')}`;
-  // const bal_from = balanceLeafs[2][2];
-  // //   const bal_from = `0x${Buffer.from(
-  // //     numToHex(balanceLeafs[2][2]),
-  // //     'hex'
-  // //   ).toString('hex')}`;
-  // const bal_to = balanceLeafs[1][2];
-  // //   const bal_to = `0x${Buffer.from(numToHex(balanceLeafs[1][2]), 'hex').toString(
-  // //     'hex'
-  // //   )}`;
-  // const bal_intermediate_roots = intermediateRoots
-  //   .reverse()
-  //   .map((root) => numToHex(root));
-  // const bal_root = numToHex(tree.root);
-  // const bal_root_from_index = index;
-  // const bal_root_from_path = path.map((hash) => numToHex(hash));
-  // const bal_root_to_index = toIndex;
-  // const bal_root_to_path = pathTo.map((hash) => numToHex(hash));
-  // const from = {
-  //   x: numToHex(accounts[1].pub[0]),
-  //   y: numToHex(accounts[1].pub[1]),
-  // };
-  // const to = {
-  //   x: numToHex(accounts[0].pub[0]),
-  //   y: numToHex(accounts[0].pub[1]),
-  // };
-  // const nonce_from = balanceLeafs[2][3];
-  // //   const nonce_from = `0x${Buffer.from(
-  // //     numToHex(balanceLeafs[2][3]),
-  // //     'hex'
-  // //   ).toString('hex')}`;
-  // const nonce_to = balanceLeafs[1][3];
-  // //   const nonce_to = `0x${Buffer.from(
-  // //     numToHex(balanceLeafs[1][3]),
-  // //     'hex'
-  // //   ).toString('hex')}`;
-  // const token_type_from = balanceLeafs[2][4];
-  // //   const token_type_from = `0x${Buffer.from(
-  // //     numToHex(balanceLeafs[2][4]),
-  // //     'hex'
-  // //   ).toString('hex')}`;
-  // const token_type_to = balanceLeafs[1][4];
-  // //   const token_type_to = `0x${Buffer.from(
-  // //     numToHex(balanceLeafs[1][4]),
-  // //     'hex'
-  // //   ).toString('hex')}`;
+  let toToml = (input) => {
+    let from = {
+      x: input.from[0][0],
+      y: input.from[0][1]
+    }
+    let to = {
+      x: input.to[0][0],
+      y: input.to[0][1]
+    }
+    let amount = input.amount[0];
+    let fromIndex = input.fromIndex[0];
+    let fromNonce = input.fromNonce[0];
+    let fromTokenType = input.fromTokenType[0];
+    // let signature = input.signature[0];
+    let fromBalance = input.fromBalance[0];
+    let toNonce = input.toNonce[0];
+    let toBalance = input.toBalance[0];
+    let toTokenType = input.toTokenType[0];
+    let fromPath = input.fromPath[0];
+    let toPath = input.toPath[0];
+    let prevRoot = input.prevRoot;
+    let nextRoot = input.nextRoot;
+    writeFileSync(
+      'circuits/Prover.toml',
+      stringify({
+        from,
+        to,
+        amount,
+        fromIndex,
+        fromNonce,
+        fromTokenType,
+        fromBalance,
+        toNonce,
+        toBalance,
+        toTokenType,
+        fromPath,
+        toPath,
+        prevRoot,
+        nextRoot
+      })
+    )
+  }
 
-  // console.log(
-  //   'Hash: ',
-  //   numToHex(
-  //     F.toObject(
-  //       poseidon([accounts[1].pub[0], accounts[1].pub[1], 150n, 1n, 1n])
-  //     )
-  //   )
-  // );
+  toToml(input)
 
-  // writeFileSync(
-  //   '../circuits/Prover.toml',
-  //   stringify({
-  //     amount,
-  //     bal_intermediate_roots,
-  //     bal_from,
-  //     bal_root,
-  //     bal_root_from_index,
-  //     bal_root_from_path,
-  //     bal_root_to_index,
-  //     bal_root_to_path,
-  //     bal_to,
-  //     from,
-  //     nonce_from,
-  //     nonce_to,
-  //     to,
-  //     token_type_from,
-  //     token_type_to,
-  //   })
-  // );
 })();
