@@ -1,6 +1,7 @@
 import { buildEddsa, buildPoseidon, buildPedersenHash, poseidonContract } from 'circomlibjs'
 import { IncrementalMerkleTree } from '@zk-kit/incremental-merkle-tree'
 import crypto from 'crypto';
+import * as secp from '@noble/secp256k1';
 
 describe("Test rollup", async () => {
     let eddsa, poseidon, _poseidon, F, zeroCache, treeDepth
@@ -127,6 +128,10 @@ describe("Test rollup", async () => {
         
         // console.log("poseidonT6ABI", poseidonT6ABI);
         // console.log("poseidonT6Bytecode", poseidonT6Bytecode);
+    })
+
+    it("test noble", async () => {
+        console.log("s", secp.utils.randomPrivateKey())
     })
 })
 
