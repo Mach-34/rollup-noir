@@ -122,8 +122,8 @@ fn tx_leaf_hash_smoke() {
 fn test_pedersen() {
     let hash = std::hash::pedersen([1, 2, 3, 4, 5]);
     std::println(hash);
-    let expected = 313118944305666717272449549161878006237057312768955426676430338257892024649;
-    // assert(expected == hash[0]);
+    let expected = 10794459586154443268856875458305400297463667634167567592475511904802857085222;
+    assert(expected == hash[0]);
 }
 
 #[test]

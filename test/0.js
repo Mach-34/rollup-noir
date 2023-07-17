@@ -62,8 +62,8 @@ describe("Test rollup", async () => {
     })
 
     it("pedersen smoke", async () => {
-        let message = [1, 2, 3, 4, 5]
-        let messageHash = await bb.pedersenHashMultiple(message);
+        let message = [1n, 2n, 3n, 4n, 5n]
+        let messageHash = await bb.pedersenPlookupCompress(message);
         console.log("pedersen hash", messageHash);
     })
 
