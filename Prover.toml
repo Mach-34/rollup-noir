@@ -1,0 +1,31 @@
+_bal_tree_depth = ""
+_nonce_to = ""
+_token_type_to = ""
+_tx_tree_depth = ""
+amount = ""
+bal_from = ""
+bal_intermediate_roots = ["", ""]
+bal_root = ""
+bal_root_index = ""
+bal_root_path = ["", "", "", ""]
+bal_to = ""
+from_index = ""
+nonce_from = ""
+to_index = ""
+token_type_from = ""
+tx_root = ""
+tx_root_index = ""
+tx_root_path = ["", "", "", ""]
+
+[from]
+x = ""
+y = ""
+
+[to]
+x = ""
+y = ""
+
+[tx_signature]
+r8_x = ""
+r8_y = ""
+s = ""
