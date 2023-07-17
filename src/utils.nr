@@ -35,6 +35,24 @@ struct InclusionProof {
     path: [Field; 4]
 }
 
+// poseidon merkle root computation
+fn compute_merkle_root_poseidon(leaf: Field, index: Field, hash_path: [Field]) -> Field {
+    let n = hash_path.len();
+    let index_bits = index.to_le_bits(n as u32);
+    let mut current = leaf;
+    for i in 0..n {
+        let path_bit = index_bits[i] as bool;
+        let (hash_left, hash_right) = if path_bit {
+            (hash_path[i], current)
+         } else {
+            (current, hash_path[i])
+         };
+
+      current = std::hash::poseidon::bn254::hash_2([hash_left, hash_right]);
+    };
+    current
+}
+
 fn balance_leaf_hash(leaf: BalanceLeaf) -> Field {
     std::hash::poseidon::bn254::hash_5([leaf.pubkey[0], leaf.pubkey[1], leaf.balance, leaf.nonce, leaf.tokenType])
 }

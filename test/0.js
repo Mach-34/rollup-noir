@@ -1,6 +1,5 @@
 const { buildEddsa, buildPoseidon, buildPedersenHash } = require('circomlibjs')
-
-// import { SinglePedersen } from '@noir-lang/barretenberg/dest/crypto/pedersen';
+const { IncrementalMerkleTree } = require('@zk-kit/incremental-merkle-tree')
 const crypto = require('crypto');
 
 describe("Test rollup", async () => {
@@ -11,7 +10,7 @@ describe("Test rollup", async () => {
         eddsa = await buildEddsa();
         poseidon = await buildPoseidon();
         pedersen = await buildPedersenHash();
-        _pedersen = (data) => F.toObject(pedersen(data));
+        _poseidon = (data) => F.toObject(poseidon(data));
 
         F = poseidon.F;
 
@@ -61,15 +60,41 @@ describe("Test rollup", async () => {
         console.log("balance leaf hash", F.toObject(messageHash));
     })
 
-    it("pedersen smoke", async () => {
+    xit("pedersen smoke", async () => {
         let message = [1n, 2n, 3n, 4n, 5n]
         let messageHash = await bb.pedersenPlookupCompress(message);
         console.log("pedersen hash", messageHash);
     })
 
-    // it("merkle tree", async () => {
-    //     let tree = new IncrementalMerkleTree(_pedersen, 4, 0)
-    //     let empty = 
-    // })
+    it("poseidon merkle tree", async () => {
+        // make new accounts
+        const keys = [
+            "4411fa416d3e9c18fc0d353b1e035bd6f387e99595255c93ce7f4395010eaf4d",
+            "c0e64dc511ef13c75e286847f14a3bfd329307f4481b3bbd49debac6f42de868",
+            "7f97f789946523c2e10ac3e70123e68f2194d50fdf37f87b6192d03b763be299"
+        ];
+        let accounts = []
+        for (let i = 0; i < keys.length; i++) {
+            let private = Buffer.from(keys[i], 'hex');
+            accounts.push({
+                private: private,
+                public: eddsa.prv2pub(private).map(point => F.toObject(point))
+            })
+        };
+        console.log(accounts)
+        // create arbitrary balance leaves
+        let balanceLeafs = [
+            // [pubkey_x, pubkey_y, balance, nonce, tokenType]
+            [0n, 0n, 0n, 0n, 0n], // empty root
+            [accounts[0].public[0], accounts[0].public[1], 100n, 1n, 1n],
+            [accounts[1].public[0], accounts[1].public[1], 200n, 0n, 1n],
+            [accounts[2].public[0], accounts[2].public[1], 0n, 3n, 1n]
+        ];
+
+        // console.log("balance leafs", balanceLeafs);
+        let hashes = balanceLeafs.map(leaf => F.toObject(poseidon(leaf)));
+        console.log("hashes", hashes);
+    })
 
 })
+
