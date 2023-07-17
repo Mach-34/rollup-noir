@@ -1,14 +1,15 @@
 import { buildEddsa, buildPoseidon, buildPedersenHash, poseidonContract } from 'circomlibjs'
 import { IncrementalMerkleTree } from '@zk-kit/incremental-merkle-tree'
-
 import crypto from 'crypto';
+import { BarretenbergApiAsync } from 'bb.js';
 
 describe("Test rollup", async () => {
     let eddsa, poseidon, _poseidon, F, zeroCache, treeDepth
-    let BarretenbergWasm, bb, barretenberg
+    let BarretenbergWasm, bb: BarretenbergApiAsync, barretenberg
 
     before(async () => {
-        // bb = await (await import("bb.js")).newBarretenbergApiAsync();
+        bb = (await (await import("bb.js")).newBarretenbergApiAsync());
+        bb
         eddsa = await buildEddsa();
         poseidon = await buildPoseidon();
         _poseidon = (data) => F.toObject(poseidon(data));
@@ -67,7 +68,7 @@ describe("Test rollup", async () => {
         // console.log("pedersen hash", messageHash);
     })
 
-    xit("poseidon merkle tree", async () => {
+    it("poseidon merkle tree", async () => {
         // make new accounts
         const keys = [
             "4411fa416d3e9c18fc0d353b1e035bd6f387e99595255c93ce7f4395010eaf4d",
@@ -116,7 +117,7 @@ describe("Test rollup", async () => {
         console.log("root: ", tree.root)
     })
 
-    it("pedersen merkle tree", async () => {
+    xit("pedersen merkle tree", async () => {
         const poseidonT3ABI = poseidonContract.generateABI(2);
         const poseidonT3Bytecode = poseidonContract.createCode(2);
 

@@ -2,10 +2,12 @@ import { ethers } from 'hardhat'
 import { poseidonContract } from 'circomlibjs'
 import { L2Account } from './accounts';
 import crypto from 'crypto'
+import { acir_read_bytes, compile } from '@noir-lang/noir_wasm';
+import initialiseAztecBackend from '@noir-lang/aztec_backend';
+//@ts-ignore
+import { initializeResolver } from "@noir-lang/noir-source-resolver";
+import fs from 'fs';
 import { resolve } from 'path';
-// import { acir_read_bytes, compile } from '@noir-lang/noir_wasm';
-// import initialiseAztecBackend from '@noir-lang/aztec_backend';
-// import initializeResolver from "@noir-lang/noir-source-resolver";
 
 
 async function initializeContracts(zeroCache) {
@@ -69,36 +71,10 @@ async function initializeContracts(zeroCache) {
     return rollup;
 }
 
-// async function compileCircuits() {
-//     initialiseResolver(() => {
-//         try {
-//             const string = fs.readFileSync('../../circuits/src/main', { encoding: 'utf8' });
-//             return string;
-//         } catch (err) {
-//             console.error(err);
-//             throw err;
-//         }
-//     });
-    
-//     compiled = await compile({});
-//     await initNoirWasm();
-//     let compiled = await fetch('../../circuits/src/main.nr')
-//         .then(r => r.text())
-//         .then(code => {
-//             initialiseResolver((id) => {
-//                 return code;
-//             });
-//         })
-//         .then(() => {
-//             try {
-//                 const compiled_noir = compile({});
-//                 return compiled_noir;
-//             } catch (e) {
-//                 console.log('Error while compiling:', e);
-//             }
-//         });
-//     console.log("compiled: ", compiled)
-// }
+async function compileCircuits() {
+    let compiled = await compile(resolve(`circuits/src/main.nr`));
+    console.log("compiled: ", compiled)
+}
 
 /**
  * Generate L2 accounts and associate them with L1 signers by name
@@ -127,7 +103,7 @@ async function generateAccounts(poseidon, eddsa) {
 
 export {
     initializeContracts,
-    // compileCircuits,
+    compileCircuits,
     generateAccounts,
     L2Account
 }

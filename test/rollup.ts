@@ -1,7 +1,7 @@
 // const { ethers } = require('hardhat')
 import { buildEddsa, buildPoseidon } from 'circomlibjs'
 import { expect } from 'chai'
-import { initializeContracts, generateAccounts, L2Account } from './utils'
+import { initializeContracts, generateAccounts, L2Account, compileCircuits } from './utils'
 import { IncrementalMerkleTree } from '@zk-kit/incremental-merkle-tree'
 
 
@@ -32,7 +32,7 @@ describe("Test Noir Rollup", async () => {
         accounts = await generateAccounts(poseidon, eddsa);
 
         // compile noir circuits
-        // await compileCircuits();
+        await compileCircuits();
     })
 
     describe("Test Despositing", async () => {
