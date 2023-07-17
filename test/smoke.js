@@ -9,7 +9,6 @@ describe("Test rollup", async () => {
         bb = await (await import("bb.js")).newBarretenbergApiAsync();
         eddsa = await buildEddsa();
         poseidon = await buildPoseidon();
-        pedersen = await buildPedersenHash();
         _poseidon = (data) => F.toObject(poseidon(data));
         treeDepth = 4
         F = poseidon.F;
