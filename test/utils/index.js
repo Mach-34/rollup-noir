@@ -42,28 +42,27 @@ async function initializeContracts(zeroCache) {
     // deploy token registry
     const tokenRegistryFactory = await ethers.getContractFactory('TokenRegistry')
     const tokenRegistry = await tokenRegistryFactory.deploy()
-    await tokenRegistry.deployed()
+
     // deploy rollup contract
     const rollupFactory = await ethers.getContractFactory('Rollup', {
-        libraries: {
-            PoseidonT3: poseidonT3.address,
-            PoseidonT5: poseidonT5.address,
-            PoseidonT6: poseidonT6.address,
-        }
+        libraries: poseidonAddresses
     })
+    // let usvAddress = await usv.getAddress();
+    // let wsvAddress = await wsv.getAddress();
+    let registryAddress = await tokenRegistry.getAddress();
+
+
     const depths = [4, 2];
     const rollupDeployArgs = [
-        // [usv.address, wsv.address, tokenRegistry.address],
-        [usv.address, wsv.address, tokenRegistry.address],
-
+        // [usvAddress, wsvAddress, registryAddress],
+        [registryAddress, registryAddress, registryAddress],
         depths,
         0,
         zeroCache
     ]
     const rollup = await rollupFactory.deploy(...rollupDeployArgs)
-    await rollup.deployed()
     // link registry and rollup
-    await tokenRegistry.setRollup(rollup.address, { from: signers[0].address })
+    await tokenRegistry.setRollup(await rollup.getAddress(), { from: operator.address })
     return rollup;
 }
 

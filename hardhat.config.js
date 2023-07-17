@@ -1,9 +1,9 @@
 require('dotenv').config()
-require("@nomiclabs/hardhat-ethers")
-require("@nomiclabs/hardhat-waffle")
 require('hardhat-deploy')
 require('hardhat-deploy-ethers')
 require('@nomiclabs/hardhat-etherscan')
+require("@nomicfoundation/hardhat-chai-matchers");
+
 
 // private environment information
 const { INFURA, MNEMONIC, ETHERSCAN, POLYGONSCAN } = process.env
