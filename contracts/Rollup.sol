@@ -81,32 +81,32 @@ contract Rollup {
         coordinator = msg.sender;
     }
 
-    // /**
-    //  * Commit a batch of L2 transactions to L1 state by proving correctness
-    //  *
-    //  * @param _proof - packed representation of zero knowledge proof of valid state change
-    //  * @param _txRoot - merkle root storing the transactions mutating currentRoot to _nextRoot
-    //  * @param _nextRoot - the balance tree root after applying _txRoot
-    //  */
-    // function updateState(
-    //     uint256[8] memory _proof,
-    //     uint256 _txRoot,
-    //     uint256 _nextRoot
-    // ) public onlyCoordinator {
-    //     // validate state change via zk proof
-    //     uint256[2] memory a = [_proof[0], _proof[1]];
-    //     uint256[2] memory b_0 = [_proof[2], _proof[3]];
-    //     uint256[2] memory b_1 = [_proof[4], _proof[5]];
-    //     uint256[2] memory c = [_proof[6], _proof[7]];
-    //     uint256[3] memory input = [_txRoot, currentRoot, _nextRoot];
-    //     require(usv.verifyProof(a, [b_0, b_1], c, input), "SNARK proof is invalid");
-    //     // update merkle root
-    //     uint256 prev = currentRoot;
-    //     currentRoot = _nextRoot;
-    //     updateNumber++;
-    //     updates[_txRoot] = updateNumber;
-    //     emit UpdatedState(currentRoot, prev, _txRoot); //newRoot, txRoot, oldRoot
-    // }
+    /**
+     * Commit a batch of L2 transactions to L1 state by proving correctness
+     *
+     * @param _proof - packed representation of zero knowledge proof of valid state change
+     * @param _txRoot - merkle root storing the transactions mutating currentRoot to _nextRoot
+     * @param _nextRoot - the balance tree root after applying _txRoot
+     */
+    function updateState(
+        uint256[8] memory _proof,
+        uint256 _txRoot,
+        uint256 _nextRoot
+    ) public onlyCoordinator {
+        // validate state change via zk proof
+        // uint256[2] memory a = [_proof[0], _proof[1]];
+        // uint256[2] memory b_0 = [_proof[2], _proof[3]];
+        // uint256[2] memory b_1 = [_proof[4], _proof[5]];
+        // uint256[2] memory c = [_proof[6], _proof[7]];
+        // uint256[3] memory input = [_txRoot, currentRoot, _nextRoot];
+        // require(usv.verifyProof(a, [b_0, b_1], c, input), "SNARK proof is invalid");
+        // update merkle root
+        uint256 prev = currentRoot;
+        currentRoot = _nextRoot;
+        updateNumber++;
+        updates[_txRoot] = updateNumber;
+        emit UpdatedState(currentRoot, prev, _txRoot); //newRoot, txRoot, oldRoot
+    }
 
     // user tries to deposit ERC20 tokens
     function deposit(
@@ -144,41 +144,41 @@ contract Rollup {
         emit RequestDeposit(pubkey, amount, tokenType);
     }
 
-    // // coordinator adds certain number of deposits to balance tree
-    // // coordinator must specify subtree index in the tree since the deposits
-    // // are being inserted at a nonzero height
-    // function processDeposits(
-    //     uint256 subtreeDepth,
-    //     uint256[] memory subtreePosition,
-    //     uint256[] memory subtreeProof
-    // ) public onlyCoordinator returns (uint256) {
-    //     // ensure subtree specified is empty
-    //     uint256 emptyRoot = zeroCache[subtreeDepth];
-    //     require(
-    //         currentRoot ==
-    //             getRootFromProof(emptyRoot, subtreePosition, subtreeProof),
-    //         "specified subtree is not empty"
-    //     );
-    //     // insert multiple leafs (insert subtree) by computing new root
-    //     uint256 oldRoot = currentRoot;
-    //     currentRoot = getRootFromProof(
-    //         pendingDeposits[depositQueueStart],
-    //         subtreePosition,
-    //         subtreeProof
-    //     );
-    //     removeDeposit(true);
-    //     uint8 numAdded = uint8(2**depositSubtreeHeight);
-    //     depositQueueSize -= numAdded;
-    //     // set deposit subtree height
-    //     depositSubtreeHeight = 0;
-    //     uint256 tmp = depositQueueSize;
-    //     while(tmp / 2 > 0) {
-    //         depositSubtreeHeight += 1;
-    //         tmp = tmp / 2;
-    //     }
-    //     emit ConfirmDeposit(oldRoot, currentRoot, numAdded);
-    //     return currentRoot;
-    // }
+    // coordinator adds certain number of deposits to balance tree
+    // coordinator must specify subtree index in the tree since the deposits
+    // are being inserted at a nonzero height
+    function processDeposits(
+        uint256 subtreeDepth,
+        uint256[] memory subtreePosition,
+        uint256[] memory subtreeProof
+    ) public onlyCoordinator returns (uint256) {
+        // ensure subtree specified is empty
+        uint256 emptyRoot = zeroCache[subtreeDepth];
+        require(
+            currentRoot ==
+                getRootFromProof(emptyRoot, subtreePosition, subtreeProof),
+            "specified subtree is not empty"
+        );
+        // insert multiple leafs (insert subtree) by computing new root
+        uint256 oldRoot = currentRoot;
+        currentRoot = getRootFromProof(
+            pendingDeposits[depositQueueStart],
+            subtreePosition,
+            subtreeProof
+        );
+        removeDeposit(true);
+        uint8 numAdded = uint8(2**depositSubtreeHeight);
+        depositQueueSize -= numAdded;
+        // set deposit subtree height
+        depositSubtreeHeight = 0;
+        uint256 tmp = depositQueueSize;
+        while(tmp / 2 > 0) {
+            depositSubtreeHeight += 1;
+            tmp = tmp / 2;
+        }
+        emit ConfirmDeposit(oldRoot, currentRoot, numAdded);
+        return currentRoot;
+    }
 
     /**
      * Withdraw a 
@@ -228,16 +228,16 @@ contract Rollup {
         emit Withdrawn(leaf, _recipient);
     }
 
-    // //call methods on TokenRegistry contract
+    //call methods on TokenRegistry contract
 
-    // function registerToken(address _token) public {
-    //     registry.registerToken(_token);
-    // }
+    function registerToken(address _token) public {
+        registry.registerToken(_token);
+    }
 
-    // function approveToken(address _token) public onlyCoordinator {
-    //     registry.approveToken(_token);
-    //     emit RegisteredToken(registry.registryIndex(), _token);
-    // }
+    function approveToken(address _token) public onlyCoordinator {
+        registry.approveToken(_token);
+        emit RegisteredToken(registry.registryIndex(), _token);
+    }
 
     // /// INTERNAL FUNCTIONS ///
 
@@ -305,7 +305,6 @@ contract Rollup {
     {
         // create return variables
         uint256 num = depositQueueEnd - depositQueueStart; // number of entries in deposit queue
-        console.log("num: %s", num);
         _leaves = new uint256[](num);
         _heights = new uint256[](num);
         // compute height
