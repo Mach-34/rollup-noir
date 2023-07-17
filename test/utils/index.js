@@ -2,7 +2,10 @@ const { ethers } = require('hardhat')
 const { poseidonContract } = require('circomlibjs')
 const L2Account = require('./accounts');
 const crypto = require('crypto')
-
+const { resolve } = require('path');
+const { acir_read_bytes, compile } = require('@noir-lang/noir_wasm');
+const initialiseAztecBackend = require('@noir-lang/aztec_backend');
+const { initializeResolver }= require("@noir-lang/noir-source-resolver");
 
 
 async function initializeContracts(zeroCache) {
@@ -38,7 +41,7 @@ async function initializeContracts(zeroCache) {
     // const wsvFactory = await ethers.getContractFactory('WithdrawSignatureVerifier')
     // const wsv = await wsvFactory.deploy()
     // await wsv.deployed()
-    
+
     // deploy token registry
     const tokenRegistryFactory = await ethers.getContractFactory('TokenRegistry')
     const tokenRegistry = await tokenRegistryFactory.deploy()
@@ -64,6 +67,37 @@ async function initializeContracts(zeroCache) {
     // link registry and rollup
     await tokenRegistry.setRollup(await rollup.getAddress(), { from: operator.address })
     return rollup;
+}
+
+async function compileCircuits() {
+    initialiseResolver(() => {
+        try {
+            const string = fs.readFileSync('../../circuits/src/main', { encoding: 'utf8' });
+            return string;
+        } catch (err) {
+            console.error(err);
+            throw err;
+        }
+    });
+    
+    // compiled = await compile({});
+    // await initNoirWasm();
+    // let compiled = await fetch('../../circuits/src/main.nr')
+    //     .then(r => r.text())
+    //     .then(code => {
+    //         initialiseResolver((id) => {
+    //             return code;
+    //         });
+    //     })
+    //     .then(() => {
+    //         try {
+    //             const compiled_noir = compile({});
+    //             return compiled_noir;
+    //         } catch (e) {
+    //             console.log('Error while compiling:', e);
+    //         }
+    //     });
+    // console.log("compiled: ", compiled)
 }
 
 /**
@@ -93,6 +127,7 @@ async function generateAccounts(poseidon, eddsa) {
 
 module.exports = {
     initializeContracts,
+    compileCircuits,
     generateAccounts,
     L2Account
 }
