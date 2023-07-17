@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "mocha --timeout 10000000"
   },
@@ -12,6 +13,7 @@
     "@babel/core": "^7.22.9",
     "@babel/preset-env": "^7.22.9",
     "@babel/register": "^7.22.5",
+    "@iarna/toml": "^2.2.5",
     "@noir-lang/aztec_backend": "^0.12.0",
     "@noir-lang/barretenberg": "github:noir-lang/barretenberg#39a1547875f941ef6640217a42d8f34972425c97",
     "@noir-lang/noir-source-resolver": "^1.1.2",

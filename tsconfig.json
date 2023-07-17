@@ -2,7 +2,7 @@
 {
     "compilerOptions": {
       "target": "ES2020",
-      "module": "commonjs",
+      "module": "CommonJS",
       "esModuleInterop": true,
       "forceConsistentCasingInFileNames": true,
       "strict": true,
@@ -11,7 +11,7 @@
       "useUnknownInCatchVariables": false,
     },
     "include": [
-      "src", "modules.d.ts", "./scripts"
+      "src", "modules.d.ts", "./scripts",
     ],
-    "files": ["./hardhat.config.ts"]
+    "files": ["./hardhat.config.ts"],
   }
