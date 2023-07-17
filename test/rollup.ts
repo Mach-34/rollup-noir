@@ -1,15 +1,16 @@
 // const { ethers } = require('hardhat')
-const { buildEddsa, buildPoseidon } = require('circomlibjs')
-const { expect } = require('chai')
-const { initializeContracts, generateAccounts, L2Account } = require('./utils')
-const { IncrementalMerkleTree } = require('@zk-kit/incremental-merkle-tree')
+import { buildEddsa, buildPoseidon } from 'circomlibjs'
+import { expect } from 'chai'
+import { initializeContracts, generateAccounts, L2Account } from './utils'
+import { IncrementalMerkleTree } from '@zk-kit/incremental-merkle-tree'
 
 
 describe("Test Noir Rollup", async () => {
-    let rollup, accounts, eddsa, poseidon, F, zeroCache, bb, treeDepth
+    let rollup, accounts, eddsa, poseidon, F, zeroCache, bb, treeDepth, _poseidon
+    let tree, subtree
     before(async () => {
         // prepare imports
-        bb = await (await import("bb.js")).newBarretenbergApiAsync();
+        // bb = await (await import("bb.js")).newBarretenbergApiAsync();
         eddsa = await buildEddsa();
         poseidon = await buildPoseidon();
         _poseidon = (data) => F.toObject(poseidon(data));
@@ -29,6 +30,9 @@ describe("Test Noir Rollup", async () => {
 
         // generate some accounts
         accounts = await generateAccounts(poseidon, eddsa);
+
+        // compile noir circuits
+        // await compileCircuits();
     })
 
     describe("Test Despositing", async () => {

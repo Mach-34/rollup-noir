@@ -1,12 +1,14 @@
-const { buildEddsa, buildPoseidon, buildPedersenHash, poseidonContract } = require('circomlibjs')
-const { IncrementalMerkleTree } = require('@zk-kit/incremental-merkle-tree')
-const crypto = require('crypto');
+import { buildEddsa, buildPoseidon, buildPedersenHash, poseidonContract } from 'circomlibjs'
+import { IncrementalMerkleTree } from '@zk-kit/incremental-merkle-tree'
+
+import crypto from 'crypto';
 
 describe("Test rollup", async () => {
-    let eddsa, poseidon, pedersen, F, zeroCache, bb, treeDepth
+    let eddsa, poseidon, _poseidon, F, zeroCache, treeDepth
+    let BarretenbergWasm, bb, barretenberg
 
     before(async () => {
-        bb = await (await import("bb.js")).newBarretenbergApiAsync();
+        // bb = await (await import("bb.js")).newBarretenbergApiAsync();
         eddsa = await buildEddsa();
         poseidon = await buildPoseidon();
         _poseidon = (data) => F.toObject(poseidon(data));
@@ -61,8 +63,8 @@ describe("Test rollup", async () => {
 
     xit("pedersen smoke", async () => {
         let message = [1n, 2n, 3n, 4n, 5n]
-        let messageHash = await bb.pedersenPlookupCompress(message);
-        console.log("pedersen hash", messageHash);
+        // let messageHash = await bb.pedersenPlookupCompress(message);
+        // console.log("pedersen hash", messageHash);
     })
 
     xit("poseidon merkle tree", async () => {
@@ -72,12 +74,16 @@ describe("Test rollup", async () => {
             "c0e64dc511ef13c75e286847f14a3bfd329307f4481b3bbd49debac6f42de868",
             "7f97f789946523c2e10ac3e70123e68f2194d50fdf37f87b6192d03b763be299"
         ];
-        let accounts = []
+        type Account = {
+            priv: Buffer,
+            pub: [bigint, bigint]
+        }
+        let accounts: Account[] = []
         for (let i = 0; i < keys.length; i++) {
-            let private = Buffer.from(keys[i], 'hex');
+            let priv = Buffer.from(keys[i], 'hex');
             accounts.push({
-                private: private,
-                public: eddsa.prv2pub(private).map(point => F.toObject(point))
+                priv,
+                pub: eddsa.prv2pub(priv).map(point => F.toObject(point))
             })
         };
 
@@ -85,9 +91,9 @@ describe("Test rollup", async () => {
         let balanceLeafs = [
             // [pubkey_x, pubkey_y, balance, nonce, tokenType]
             [0n, 0n, 0n, 0n, 0n], // empty root
-            [accounts[0].public[0], accounts[0].public[1], 100n, 1n, 1n],
-            [accounts[1].public[0], accounts[1].public[1], 200n, 0n, 1n],
-            [accounts[2].public[0], accounts[2].public[1], 0n, 3n, 1n]
+            [accounts[0].pub[0], accounts[0].pub[1], 100n, 1n, 1n],
+            [accounts[1].pub[0], accounts[1].pub[1], 200n, 0n, 1n],
+            [accounts[2].pub[0], accounts[2].pub[1], 0n, 3n, 1n]
         ];
         let hashes = balanceLeafs.map(leaf => poseidon(leaf));
 
@@ -114,8 +120,8 @@ describe("Test rollup", async () => {
         const poseidonT3ABI = poseidonContract.generateABI(2);
         const poseidonT3Bytecode = poseidonContract.createCode(2);
 
-        console.log("poseidonT3ABI", poseidonT3ABI);
-        console.log("poseidonT3Bytecode", poseidonT3Bytecode);
+        // console.log("poseidonT3ABI", poseidonT3ABI);
+        // console.log("poseidonT3Bytecode", poseidonT3Bytecode);
 
         // const poseidonT6ABI = poseidonContract.generateABI(5);
         // const poseidonT6Bytecode = poseidonContract.createCode(5);
