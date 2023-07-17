@@ -7,18 +7,21 @@ const { poseidonContract, buildPoseidonOpt } = require('circomlibjs')
  */
 module.exports = async ({ run, ethers, network, deployments }) => {
 
-    // get zero cache
-    const depths = [4, 2];
+    // instantiate poseidon hasher
     const poseidon = await buildPoseidonOpt();
+
+    // build tree zero cache
+    const depths = [4, 2]; // [account/ balance tree depth, tx tree depth]
     const zeroCache = [BigInt(0)];
-    for (let i = 1; i < depths[0]; i++) {
+    for (let i = 1; i <= depths[0]; i++) {
         const root = zeroCache[i - 1];
         zeroCache.push(BigInt(`0x${Buffer.from(poseidon([root, root])).toString('hex')}`));
     }
+  
     // get deploying account
-    const [operator, alice, bob, charlie, david, emily] = await ethers.getSigners();
+    const [operator] = await ethers.getSigners();
 
-    // deploy hash constructs for 2 and 5 inputs
+    // deploy hash constructs for 2, 4, and 5 inputs
     const poseidonT3ABI = poseidonContract.generateABI(2);
     const poseidonT3Bytecode = poseidonContract.createCode(2);
     const poseidonT3Factory = new ethers.ContractFactory(poseidonT3ABI, poseidonT3Bytecode, operator);
@@ -35,14 +38,10 @@ module.exports = async ({ run, ethers, network, deployments }) => {
     const poseidonT6 = await poseidonT6Factory.deploy();
 
     let poseidonAddresses = {
-        t3: await poseidonT3.getAddress(),
-        t5: await poseidonT5.getAddress(),
-        t6: await poseidonT6.getAddress()
+        PoseidonT3: await poseidonT3.getAddress(),
+        PoseidonT5: await poseidonT5.getAddress(),
+        PoseidonT6: await poseidonT6.getAddress()
     }
-
-    console.log("deployed poseidon: ", poseidonAddresses)
-    // console.log("deployed t5: ", poseidonT5.address)
-    // console.log("deployed t6: ", poseidonT6.address)
 
     // deploy verifiers
     // const { address: usvAddress } = await deployments.deploy('UpdateStateVerifier', {
@@ -55,28 +54,34 @@ module.exports = async ({ run, ethers, network, deployments }) => {
     // })
 
     // // deploy token registry
-    // const { address: registryAddress } = await deployments.deploy('TokenRegistry', {
-    //     from: operator.address,
-    //     log: true
-    // })
+    const { address: registryAddress } = await deployments.deploy('TokenRegistry', {
+        from: operator.address,
+        log: true
+    })
     
-    // // deploy rollup contract
-    // const { address: rollupAddress } = await deployments.deploy('RollupNC', {
-    //     from: operator.address,
-    //     args: [
-    //         [usvAddress, wsvAddress, registryAddress],
-    //         depths,
-    //         0,
-    //         zeroCache
-    //     ],
-    //     libraries: {
-    //         PoseidonT3: poseidonT3.address,
-    //         PoseidonT5: poseidonT5.address,
-    //         PoseidonT6: poseidonT6.address
-    //     }
-    // })
-    // console.log('Deployed Rollup to ', rollupAddress)
-}
+    // deploy rollup contract
+    const { address: rollupAddress } = await deployments.deploy('Rollup', {
+        from: operator.address,
+        args: [
+            // [usvAddress, wsvAddress, registryAddress],
+            [registryAddress, registryAddress, registryAddress],
+            depths,
+            0,
+            zeroCache
+        ],
+        libraries: poseidonAddresses,
+        log: true
+    })
+    console.log("finished deploying Noir Rollup!")
+    console.log("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+    console.log("Permissioned Rollup Operator: ", operator.address)
+    console.log("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+    console.log("Poseidon Hash2: ", poseidonAddresses.PoseidonT3)
+    console.log("Poseidon Hash4: ", poseidonAddresses.PoseidonT5)
+    console.log("Poseidon Hash5: ", poseidonAddresses.PoseidonT6)
+    console.log("Token Registry: ", registryAddress)
+    console.log("Rollup Contract: ", rollupAddress)
+    }
 
 // /**
 //  * Determine if err message can be ignored

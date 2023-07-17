@@ -6,10 +6,9 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/ITokenRegistry.sol";
 // import "./interfaces/IVerifier.sol";
 // import { UnpackedProof, PackedProofs } from "./libraries/PackedProofs.sol";
-import "./libraries/Poseidon.sol";
+// import "./libraries/Poseidon.sol";
 
-/// @title implementation of Non-custodial rollup
-contract RollupNC {
+contract Rollup {
 
     // IUSV public usv; // update state verifier
     // IWSV public wsv; // withdraw signature verifier
@@ -50,36 +49,36 @@ contract RollupNC {
         _;
     }
     
-    // /// @dev construct a new non-custodial on-chain rollup
-    // /// @param _addresses: array of addresses used in the rollup contract
-    // ///   [0]: Update State Verifier contract
-    // ///   [1]: Withdrawal Signature Verifier contract
-    // ///   [2]: Rollup token registry contract
-    // /// @param _depth: depth of trees
-    // ///   [0]: Balance tree max depth
-    // ///   [1]: Tx tree max depth
-    // /// @param _zero: the value to use for an empty leaf in a merkle tree
-    // /// @param _zeroCache: array of precomputed roots for zero's at different heights
-    // constructor(
-    //     address[3] memory _addresses,
-    //     uint256[2] memory _depth,
-    //     uint256 _zero,
-    //     uint256[] memory _zeroCache
-    // ) {
-    //     require(_depth[0] + 1 == _zeroCache.length, "Param size mismatch");
-    //     // assign contract references
-    //     // usv = IUSV(_addresses[0]);
-    //     // wsv = IWSV(_addresses[1]);
-    //     registry = ITokenRegistry(_addresses[2]);
+    /// @dev construct a new non-custodial on-chain rollup
+    /// @param _addresses: array of addresses used in the rollup contract
+    ///   [0]: Update State Verifier contract
+    ///   [1]: Withdrawal Signature Verifier contract
+    ///   [2]: Rollup token registry contract
+    /// @param _depth: depth of trees
+    ///   [0]: Balance tree max depth
+    ///   [1]: Tx tree max depth
+    /// @param _zero: the value to use for an empty leaf in a merkle tree
+    /// @param _zeroCache: array of precomputed roots for zero's at different heights
+    constructor(
+        address[3] memory _addresses,
+        uint256[2] memory _depth,
+        uint256 _zero,
+        uint256[] memory _zeroCache
+    ) {
+        require(_depth[0] + 1 == _zeroCache.length, "Param size mismatch");
+        // assign contract references
+        // usv = IUSV(_addresses[0]);
+        // wsv = IWSV(_addresses[1]);
+        registry = ITokenRegistry(_addresses[2]);
 
-    //     // assign primative variables
-    //     balDepth = _depth[0];
-    //     txDepth = _depth[1];
-    //     ZERO = _zero;
-    //     zeroCache = _zeroCache;
-    //     currentRoot = zeroCache[balDepth];
-    //     coordinator = msg.sender;
-    // }
+        // assign primative variables
+        balDepth = _depth[0];
+        txDepth = _depth[1];
+        ZERO = _zero;
+        zeroCache = _zeroCache;
+        currentRoot = zeroCache[balDepth];
+        coordinator = msg.sender;
+    }
 
     // /**
     //  * Commit a batch of L2 transactions to L1 state by proving correctness
