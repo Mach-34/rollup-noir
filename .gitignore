@@ -1,2 +1,6 @@
 node_modules
 barretenberg
+*.bin
+.env
+artifacts
+cache

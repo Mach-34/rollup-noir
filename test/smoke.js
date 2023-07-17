@@ -1,9 +1,9 @@
-const { buildEddsa, buildPoseidon, buildPedersenHash } = require('circomlibjs')
+const { buildEddsa, buildPoseidon, buildPedersenHash, poseidonContract } = require('circomlibjs')
 const { IncrementalMerkleTree } = require('@zk-kit/incremental-merkle-tree')
 const crypto = require('crypto');
 
 describe("Test rollup", async () => {
-    let eddsa, poseidon, pedersen, F, zeroCache, bb
+    let eddsa, poseidon, pedersen, F, zeroCache, bb, treeDepth
 
     before(async () => {
         bb = await (await import("bb.js")).newBarretenbergApiAsync();
@@ -11,15 +11,15 @@ describe("Test rollup", async () => {
         poseidon = await buildPoseidon();
         pedersen = await buildPedersenHash();
         _poseidon = (data) => F.toObject(poseidon(data));
-
+        treeDepth = 4
         F = poseidon.F;
 
-        // zeroCache = [BigInt(0)];
-        // for (let i = 1; i <= depths[0]; i++) {
-        //     const root = zeroCache[i - 1];
-        //     const internalNode = pedersen([root, root])
-        //     zeroCache.push(F.toObject(internalNode));
-        // }
+        zeroCache = [BigInt(0)];
+        for (let i = 1; i <= treeDepth; i++) {
+            const root = zeroCache[i - 1];
+            const internalNode = poseidon([root, root])
+            zeroCache.push(F.toObject(internalNode));
+        }
     });
 
     xit("should sign with poseidon", async () => {
@@ -66,7 +66,7 @@ describe("Test rollup", async () => {
         console.log("pedersen hash", messageHash);
     })
 
-    it("poseidon merkle tree", async () => {
+    xit("poseidon merkle tree", async () => {
         // make new accounts
         const keys = [
             "4411fa416d3e9c18fc0d353b1e035bd6f387e99595255c93ce7f4395010eaf4d",
@@ -81,7 +81,7 @@ describe("Test rollup", async () => {
                 public: eddsa.prv2pub(private).map(point => F.toObject(point))
             })
         };
-        console.log(accounts)
+
         // create arbitrary balance leaves
         let balanceLeafs = [
             // [pubkey_x, pubkey_y, balance, nonce, tokenType]
@@ -90,11 +90,39 @@ describe("Test rollup", async () => {
             [accounts[1].public[0], accounts[1].public[1], 200n, 0n, 1n],
             [accounts[2].public[0], accounts[2].public[1], 0n, 3n, 1n]
         ];
+        let hashes = balanceLeafs.map(leaf => poseidon(leaf));
 
-        // console.log("balance leafs", balanceLeafs);
-        let hashes = balanceLeafs.map(leaf => F.toObject(poseidon(leaf)));
-        console.log("hashes", hashes);
+        // built merkle tree
+        let tree = new IncrementalMerkleTree(_poseidon, treeDepth, 0);
+        for (let i = 0; i < hashes.length; i++) {
+            tree.insert(F.toObject(hashes[i]));
+        }
+
+
+        // get merkle proof for leaf 2
+        let proof = tree.createProof(2);
+        let path = proof.siblings.map(sibling => sibling[0]);
+
+        // log used variables in poseidon merkle smoke test
+        console.log("account", accounts[1])
+        console.log("hash: ", F.toObject(hashes[2]))
+        console.log("proof path: ", path);
+        console.log("index: 2")
+        console.log("root: ", tree.root)
     })
 
+    it("pedersen merkle tree", async () => {
+        const poseidonT3ABI = poseidonContract.generateABI(2);
+        const poseidonT3Bytecode = poseidonContract.createCode(2);
+
+        console.log("poseidonT3ABI", poseidonT3ABI);
+        console.log("poseidonT3Bytecode", poseidonT3Bytecode);
+
+        // const poseidonT6ABI = poseidonContract.generateABI(5);
+        // const poseidonT6Bytecode = poseidonContract.createCode(5);
+        
+        // console.log("poseidonT6ABI", poseidonT6ABI);
+        // console.log("poseidonT6Bytecode", poseidonT6Bytecode);
+    })
 })
 
