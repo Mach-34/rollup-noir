@@ -4,8 +4,18 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha --timeout 10000000"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@babel/core": "^7.22.9",
+    "@babel/register": "^7.22.5",
+    "@noir-lang/barretenberg": "^2.19.0",
+    "@zk-kit/incremental-merkle-tree": "^1.1.0",
+    "bb.js": "link:./barretenberg/ts/dest/",
+    "chai": "^4.3.7",
+    "circomlibjs": "^0.1.7",
+    "mocha": "^10.2.0"
+  }
 }
