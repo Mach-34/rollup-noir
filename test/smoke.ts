@@ -47,9 +47,9 @@ describe("Test rollup", async () => {
         console.log("signature", signature);
     })
 
-    xit("should produce hash for tx leaf", async () => {
+    it("should produce hash for tx leaf", async () => {
         // generate the expected tx leaf hash (used in noir test)
-        let message = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        let message = [1, 2, 3, 4, 5, 6, 7, 8]
         let messageHash = poseidon(message);
         console.log("tx leaf hash", F.toObject(messageHash));
     })
