@@ -1,8 +1,11 @@
-const { ethers } = require('hardhat')
-const { poseidonContract } = require('circomlibjs')
-const L2Account = require('./accounts');
-const crypto = require('crypto')
-
+import { ethers } from 'hardhat'
+import { poseidonContract } from 'circomlibjs'
+import { L2Account } from './accounts';
+import crypto from 'crypto'
+import { resolve } from 'path';
+// import { acir_read_bytes, compile } from '@noir-lang/noir_wasm';
+// import initialiseAztecBackend from '@noir-lang/aztec_backend';
+// import initializeResolver from "@noir-lang/noir-source-resolver";
 
 
 async function initializeContracts(zeroCache) {
@@ -38,34 +41,64 @@ async function initializeContracts(zeroCache) {
     // const wsvFactory = await ethers.getContractFactory('WithdrawSignatureVerifier')
     // const wsv = await wsvFactory.deploy()
     // await wsv.deployed()
-    
+
     // deploy token registry
     const tokenRegistryFactory = await ethers.getContractFactory('TokenRegistry')
     const tokenRegistry = await tokenRegistryFactory.deploy()
-    await tokenRegistry.deployed()
+
     // deploy rollup contract
     const rollupFactory = await ethers.getContractFactory('Rollup', {
-        libraries: {
-            PoseidonT3: poseidonT3.address,
-            PoseidonT5: poseidonT5.address,
-            PoseidonT6: poseidonT6.address,
-        }
+        libraries: poseidonAddresses
     })
+    // let usvAddress = await usv.getAddress();
+    // let wsvAddress = await wsv.getAddress();
+    let registryAddress = await tokenRegistry.getAddress();
+
+
     const depths = [4, 2];
     const rollupDeployArgs = [
-        // [usv.address, wsv.address, tokenRegistry.address],
-        [usv.address, wsv.address, tokenRegistry.address],
-
+        // [usvAddress, wsvAddress, registryAddress],
+        [registryAddress, registryAddress, registryAddress],
         depths,
         0,
         zeroCache
     ]
     const rollup = await rollupFactory.deploy(...rollupDeployArgs)
-    await rollup.deployed()
     // link registry and rollup
-    await tokenRegistry.setRollup(rollup.address, { from: signers[0].address })
+    await tokenRegistry.setRollup(await rollup.getAddress(), { from: operator.address })
     return rollup;
 }
+
+// async function compileCircuits() {
+//     initialiseResolver(() => {
+//         try {
+//             const string = fs.readFileSync('../../circuits/src/main', { encoding: 'utf8' });
+//             return string;
+//         } catch (err) {
+//             console.error(err);
+//             throw err;
+//         }
+//     });
+    
+//     compiled = await compile({});
+//     await initNoirWasm();
+//     let compiled = await fetch('../../circuits/src/main.nr')
+//         .then(r => r.text())
+//         .then(code => {
+//             initialiseResolver((id) => {
+//                 return code;
+//             });
+//         })
+//         .then(() => {
+//             try {
+//                 const compiled_noir = compile({});
+//                 return compiled_noir;
+//             } catch (e) {
+//                 console.log('Error while compiling:', e);
+//             }
+//         });
+//     console.log("compiled: ", compiled)
+// }
 
 /**
  * Generate L2 accounts and associate them with L1 signers by name
@@ -92,8 +125,9 @@ async function generateAccounts(poseidon, eddsa) {
         }, {});
 }
 
-module.exports = {
+export {
     initializeContracts,
+    // compileCircuits,
     generateAccounts,
     L2Account
 }
