@@ -1,12 +1,13 @@
 // const { ethers } = require('hardhat')
 import { buildEddsa, buildPoseidon } from 'circomlibjs'
-import { expect } from ('chai')
-import { initializeContracts, generateAccounts, L2Account, compileCircuits } from './utils'
+import { expect } from 'chai'
+import { initializeContracts, generateAccounts, L2Account } from './utils'
 import { IncrementalMerkleTree } from '@zk-kit/incremental-merkle-tree'
 
 
 describe("Test Noir Rollup", async () => {
     let rollup, accounts, eddsa, poseidon, F, zeroCache, bb, treeDepth, _poseidon
+    let tree, subtree
     before(async () => {
         // prepare imports
         // bb = await (await import("bb.js")).newBarretenbergApiAsync();

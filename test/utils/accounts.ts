@@ -1,9 +1,9 @@
-const crypto = require('crypto');
+import crypto from 'crypto';
 
 /**
  * @title Offchain (EdDSA) account state
  */
-module.exports = class L2Account {
+export class L2Account {
 
     /// CIRCOMLIBJS HELPERS ///
     poseidon; // Poseidon Hasher Object

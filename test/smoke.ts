@@ -1,7 +1,7 @@
 import { buildEddsa, buildPoseidon, buildPedersenHash, poseidonContract } from 'circomlibjs'
 import { IncrementalMerkleTree } from '@zk-kit/incremental-merkle-tree'
 
-const crypto = require('crypto');
+import crypto from 'crypto';
 
 describe("Test rollup", async () => {
     let eddsa, poseidon, _poseidon, F, zeroCache, treeDepth
