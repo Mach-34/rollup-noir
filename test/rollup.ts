@@ -30,9 +30,6 @@ describe("Test Noir Rollup", async () => {
 
         // generate some accounts
         accounts = await generateAccounts(poseidon, eddsa);
-
-        // compile noir circuits
-        await compileCircuits();
     })
 
     describe("Test Despositing", async () => {

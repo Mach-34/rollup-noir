@@ -2,13 +2,6 @@ import { ethers } from 'hardhat'
 import { poseidonContract } from 'circomlibjs'
 import { L2Account } from './accounts';
 import crypto from 'crypto'
-import { acir_read_bytes, compile } from '@noir-lang/noir_wasm';
-import initialiseAztecBackend from '@noir-lang/aztec_backend';
-//@ts-ignore
-import { initializeResolver } from "@noir-lang/noir-source-resolver";
-import fs from 'fs';
-import { resolve } from 'path';
-
 
 async function initializeContracts(zeroCache) {
     // get deploying account
@@ -69,11 +62,6 @@ async function initializeContracts(zeroCache) {
     // link registry and rollup
     await tokenRegistry.setRollup(await rollup.getAddress(), { from: operator.address })
     return rollup;
-}
-
-async function compileCircuits() {
-    let compiled = await compile(resolve(`circuits/src/main.nr`));
-    console.log("compiled: ", compiled)
 }
 
 /**

@@ -1,15 +1,13 @@
 import { buildEddsa, buildPoseidon, buildPedersenHash, poseidonContract } from 'circomlibjs'
 import { IncrementalMerkleTree } from '@zk-kit/incremental-merkle-tree'
 import crypto from 'crypto';
-import { BarretenbergApiAsync } from 'bb.js';
 
 describe("Test rollup", async () => {
     let eddsa, poseidon, _poseidon, F, zeroCache, treeDepth
-    let BarretenbergWasm, bb: BarretenbergApiAsync, barretenberg
+    let BarretenbergWasm, barretenberg
 
     before(async () => {
-        bb = (await (await import("bb.js")).newBarretenbergApiAsync());
-        bb
+        // bb = (await (await import("bb.js")).newBarretenbergApiAsync());
         eddsa = await buildEddsa();
         poseidon = await buildPoseidon();
         _poseidon = (data) => F.toObject(poseidon(data));
