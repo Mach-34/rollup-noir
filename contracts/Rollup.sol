@@ -107,45 +107,45 @@ contract Rollup {
     //     emit UpdatedState(currentRoot, prev, _txRoot); //newRoot, txRoot, oldRoot
     // }
 
-    // // user tries to deposit ERC20 tokens
-    // function deposit(
-    //     uint256[2] memory pubkey,
-    //     uint256 amount,
-    //     uint256 tokenType
-    // ) public payable {
-    //     // Ensure token can be transferred
-    //     checkToken(amount, tokenType);
-    //     // Store deposit leaf
-    //     uint256 depositHash = PoseidonT6.poseidon(
-    //         [pubkey[0], pubkey[1], amount, uint256(0), tokenType]
-    //     );
-    //     pendingDeposits[depositQueueEnd] = depositHash;
-    //     depositQueueEnd++;
-    //     depositQueueSize++;
-    //     // Generate
-    //     uint8 tmpDepositSubtreeHeight = 0;
-    //     uint256 tmp = depositQueueSize;
-    //     while (tmp % 2 == 0) {
-    //         // while leafs can be hashed into merkle tree, generate a higher order internal node
-    //         pendingDeposits[depositQueueEnd - 2] = PoseidonT3.poseidon(
-    //             [
-    //                 pendingDeposits[depositQueueEnd - 2],
-    //                 pendingDeposits[depositQueueEnd - 1]
-    //             ]
-    //         );
-    //         removeDeposit(false);
-    //         tmp = tmp / 2;
-    //         tmpDepositSubtreeHeight++;
-    //     }
-    //     if (tmpDepositSubtreeHeight > depositSubtreeHeight) {
-    //         depositSubtreeHeight = tmpDepositSubtreeHeight;
-    //     }
-    //     emit RequestDeposit(pubkey, amount, tokenType);
-    // }
+    // user tries to deposit ERC20 tokens
+    function deposit(
+        uint256[2] memory pubkey,
+        uint256 amount,
+        uint256 tokenType
+    ) public payable {
+        // Ensure token can be transferred
+        checkToken(amount, tokenType);
+        // Store deposit leaf
+        uint256 depositHash = PoseidonT6.poseidon(
+            [pubkey[0], pubkey[1], amount, uint256(0), tokenType]
+        );
+        pendingDeposits[depositQueueEnd] = depositHash;
+        depositQueueEnd++;
+        depositQueueSize++;
+        // Generate
+        uint8 tmpDepositSubtreeHeight = 0;
+        uint256 tmp = depositQueueSize;
+        while (tmp % 2 == 0) {
+            // while leafs can be hashed into merkle tree, generate a higher order internal node
+            pendingDeposits[depositQueueEnd - 2] = PoseidonT3.poseidon(
+                [
+                    pendingDeposits[depositQueueEnd - 2],
+                    pendingDeposits[depositQueueEnd - 1]
+                ]
+            );
+            removeDeposit(false);
+            tmp = tmp / 2;
+            tmpDepositSubtreeHeight++;
+        }
+        if (tmpDepositSubtreeHeight > depositSubtreeHeight) {
+            depositSubtreeHeight = tmpDepositSubtreeHeight;
+        }
+        emit RequestDeposit(pubkey, amount, tokenType);
+    }
 
-    // // // coordinator adds certain number of deposits to balance tree
-    // // // coordinator must specify subtree index in the tree since the deposits
-    // // // are being inserted at a nonzero height
+    // // coordinator adds certain number of deposits to balance tree
+    // // coordinator must specify subtree index in the tree since the deposits
+    // // are being inserted at a nonzero height
     // function processDeposits(
     //     uint256 subtreeDepth,
     //     uint256[] memory subtreePosition,

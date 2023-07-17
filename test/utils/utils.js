@@ -6,8 +6,10 @@ const crypto = require('crypto')
 
 
 async function initializeContracts(zeroCache) {
-    const signers = await ethers.getSigners()
+    // get deploying account
+    const [operator] = await ethers.getSigners();
 
+    // deploy hash constructs for 2, 4, and 5 inputs
     const poseidonT3ABI = poseidonContract.generateABI(2);
     const poseidonT3Bytecode = poseidonContract.createCode(2);
     const poseidonT3Factory = new ethers.ContractFactory(poseidonT3ABI, poseidonT3Bytecode, operator);
@@ -22,6 +24,47 @@ async function initializeContracts(zeroCache) {
     const poseidonT6Bytecode = poseidonContract.createCode(5);
     const poseidonT6Factory = new ethers.ContractFactory(poseidonT6ABI, poseidonT6Bytecode, operator);
     const poseidonT6 = await poseidonT6Factory.deploy();
+
+    let poseidonAddresses = {
+        PoseidonT3: await poseidonT3.getAddress(),
+        PoseidonT5: await poseidonT5.getAddress(),
+        PoseidonT6: await poseidonT6.getAddress()
+    }
+
+    // // deploy verifiers
+    // const usvFactory = await ethers.getContractFactory('UpdateStateVerifier')
+    // const usv = await usvFactory.deploy()
+    // await usv.deployed()
+    // const wsvFactory = await ethers.getContractFactory('WithdrawSignatureVerifier')
+    // const wsv = await wsvFactory.deploy()
+    // await wsv.deployed()
+    
+    // deploy token registry
+    const tokenRegistryFactory = await ethers.getContractFactory('TokenRegistry')
+    const tokenRegistry = await tokenRegistryFactory.deploy()
+    await tokenRegistry.deployed()
+    // deploy rollup contract
+    const rollupFactory = await ethers.getContractFactory('Rollup', {
+        libraries: {
+            PoseidonT3: poseidonT3.address,
+            PoseidonT5: poseidonT5.address,
+            PoseidonT6: poseidonT6.address,
+        }
+    })
+    const depths = [4, 2];
+    const rollupDeployArgs = [
+        // [usv.address, wsv.address, tokenRegistry.address],
+        [usv.address, wsv.address, tokenRegistry.address],
+
+        depths,
+        0,
+        zeroCache
+    ]
+    const rollup = await rollupFactory.deploy(...rollupDeployArgs)
+    await rollup.deployed()
+    // link registry and rollup
+    await tokenRegistry.setRollup(rollup.address, { from: signers[0].address })
+    return rollup;
 }
 
 /**
