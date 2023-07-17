@@ -1,16 +1,27 @@
-const { buildEddsa, buildPoseidon } = require('circomlibjs')
+const { buildEddsa, buildPoseidon, buildPedersenHash } = require('circomlibjs')
+import { SinglePedersen } from '@noir-lang/barretenberg/dest/crypto/pedersen';
 const crypto = require('crypto');
 
 describe("Test rollup", async () => {
-    let eddsa, poseidon, F
+    let eddsa, poseidon, pedersen, F, zeroCache
 
     before(async () => {
         eddsa = await buildEddsa();
         poseidon = await buildPoseidon();
+        pedersen = await buildPedersenHash();
+        _pedersen = (data) => F.toObject(pedersen(data));
+
         F = poseidon.F;
+
+        // zeroCache = [BigInt(0)];
+        // for (let i = 1; i <= depths[0]; i++) {
+        //     const root = zeroCache[i - 1];
+        //     const internalNode = pedersen([root, root])
+        //     zeroCache.push(F.toObject(internalNode));
+        // }
     });
 
-    xit("should sign with poseidon", async () => {
+    it("should sign with poseidon", async () => {
         // make account
         // let bytes = crypto.randomBytes(32);
         let bytes = Buffer.from("5049aa9160a5bcc3d80a60a3d3d5e40a106c3cec52583362f894fd4ca9c868f8", 'hex');
@@ -21,14 +32,16 @@ describe("Test rollup", async () => {
         }
 
         // make message
-        let message = [0, 1, 2, 3, 4].map(element => F.toObject(element));
+        let message = [1, 2, 3, 4, 5].map(element => F.toObject(element));
         let messageHash = poseidon(message);
 
         // sign message
         let signature = eddsa.signPoseidon(account.private, messageHash);
+        console.log("signature: ", signature)
         signature = [...signature.R8.map(point => F.toObject(point)), signature.S]
 
         // print values for verification
+        console.log("pubkey", account.public);
         console.log("signature", signature);
     })
 
@@ -45,4 +58,16 @@ describe("Test rollup", async () => {
         let messageHash = poseidon(message);
         console.log("balance leaf hash", F.toObject(messageHash));
     })
+
+    it("pedersen smoke", async () => {
+        let message = [1, 2, 3, 4, 5]
+        let messageHash = pedersen.hash(message);
+        console.log("pedersen hash", F.toObject(messageHash));
+    })
+
+    // it("merkle tree", async () => {
+    //     let tree = new IncrementalMerkleTree(_pedersen, 4, 0)
+    //     let empty = 
+    // })
+
 })
