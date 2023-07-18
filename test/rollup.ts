@@ -184,29 +184,29 @@ describe("Test Noir Rollup", async () => {
                 })
             })
             describe("Rollup transactions", async () => {
-                // before(async () => {
-                //     txs = [];
-                //     txTree = new IncrementalMerkleTree(_poseidon, 2, BigInt(0));
-                //     input = {
-                //         from: [], // array of sender eddsa keys
-                //         to: [], // array of receiver eddsa keys x
-                //         amount: [], // array of L2 transaction values
-                //         fromIndex: [], // array of sender index in balance tree
-                //         fromNonce: [], // array of sender nonce for tx
-                //         fromTokenType: [], // array of sender token types
-                //         // signature: [], // array of signatures by sender eddsa key on tx data
-                //         fromBalance: [], // array of sender balances
-                //         toNonce: [], // array of receiver nonce in bal tree
-                //         toBalance: [],
-                //         toTokenType: [],
-                //         // txPath: [],
-                //         fromPath: [],
-                //         toPath: [],
-                //         // txRoot: undefined,
-                //         prevRoot: tree.root,
-                //         nextRoot: undefined
-                //     }
-                // })
+                before(async () => {
+                    txs = [];
+                    txTree = new IncrementalMerkleTree(_poseidon, 2, BigInt(0));
+                    input = {
+                        from: [], // array of sender eddsa keys
+                        to: [], // array of receiver eddsa keys x
+                        amount: [], // array of L2 transaction values
+                        fromIndex: [], // array of sender index in balance tree
+                        fromNonce: [], // array of sender nonce for tx
+                        fromTokenType: [], // array of sender token types
+                        // signature: [], // array of signatures by sender eddsa key on tx data
+                        fromBalance: [], // array of sender balances
+                        toNonce: [], // array of receiver nonce in bal tree
+                        toBalance: [],
+                        toTokenType: [],
+                        // txPath: [],
+                        fromPath: [],
+                        toPath: [],
+                        // txRoot: undefined,
+                        prevRoot: tree.root,
+                        nextRoot: undefined
+                    }
+                })
 
                 xit('Alice --{200}--> Bob', async () => {
                     // compute inclusion proof & update sender in balance tree 

@@ -9,10 +9,14 @@ import "./interfaces/ITokenRegistry.sol";
 import "./libraries/Poseidon.sol";
 import "hardhat/console.sol";
 
+interface IVerifier {
+    function verify(bytes calldata _proof, bytes32[] calldata _publicInputs) external view returns (bool);
+}
+
 contract Rollup {
 
-    // IUSV public usv; // update state verifier
-    // IWSV public wsv; // withdraw signature verifier
+    IVerifier public usv; // update state verifier
+    IVerifier public wsv; // withdraw signature verifier
     mapping(uint256 => uint256) public pendingDeposits;
     ITokenRegistry public registry;
 
@@ -68,8 +72,8 @@ contract Rollup {
     ) {
         require(_depth[0] + 1 == _zeroCache.length, "Param size mismatch");
         // assign contract references
-        // usv = IUSV(_addresses[0]);
-        // wsv = IWSV(_addresses[1]);
+        usv = IVerifier(_addresses[0]);
+        wsv = IVerifier(_addresses[1]);
         registry = ITokenRegistry(_addresses[2]);
 
         // assign primative variables
@@ -84,22 +88,25 @@ contract Rollup {
     /**
      * Commit a batch of L2 transactions to L1 state by proving correctness
      *
-     * @param _proof - packed representation of zero knowledge proof of valid state change
+     * @param _proof - ultraplonk proof of state transition
      * @param _txRoot - merkle root storing the transactions mutating currentRoot to _nextRoot
      * @param _nextRoot - the balance tree root after applying _txRoot
      */
     function updateState(
-        uint256[8] memory _proof,
+        bytes calldata proof,
         uint256 _txRoot,
         uint256 _nextRoot
     ) public onlyCoordinator {
         // validate state change via zk proof
-        // uint256[2] memory a = [_proof[0], _proof[1]];
-        // uint256[2] memory b_0 = [_proof[2], _proof[3]];
-        // uint256[2] memory b_1 = [_proof[4], _proof[5]];
-        // uint256[2] memory c = [_proof[6], _proof[7]];
-        // uint256[3] memory input = [_txRoot, currentRoot, _nextRoot];
-        // require(usv.verifyProof(a, [b_0, b_1], c, input), "SNARK proof is invalid");
+        bytes32[] calldata input = [
+            bytes32(currentRoot),
+            bytes32(_nextRoot),
+            bytes32(_txRoot)
+        ];
+        require(
+            usv.verify(proof, input),
+            "ultraplonk proof is not valid"
+        );
         // update merkle root
         uint256 prev = currentRoot;
         currentRoot = _nextRoot;
@@ -189,7 +196,7 @@ contract Rollup {
         uint256[] memory _txPosition,
         uint256[] memory _txProof,
         address payable _recipient,
-        uint256[8] memory _proof
+        bytes calldata proof
     ) public txTreeExists(_txRoot) {
         require(_tx[7] > 0, "invalid tokenType");
         uint256 leaf = PoseidonT3.poseidon([
@@ -203,25 +210,19 @@ contract Rollup {
         );
         // validate state change via zk proof
         uint256[4] memory input = [_tx[0], _tx[1], uint256(uint160(address(_recipient))), _tx[5]];
-        // require(
-        //     wsv.verifyProof(
-        //         [_proof[0], _proof[1]], 
-        //         [[_proof[2], _proof[3]], [_proof[4], _proof[5]]],
-        //         [_proof[6], _proof[7]],
-        //         input
-        //     ),
-        //     "eddsa signature is not valid"
-        // );
-
+        require(
+            wsv.verify(proof, input),
+            "withdrawal signature proof is not valid"
+        );
         // transfer token on tokenContract
         if (_tx[7] == 1) {
             // ETH
-            _recipient.transfer(_tx[6]);
+            msg.sender.transfer(_tx[6]);
         } else {
             // ERC20
             address erc20 = registry.registry(_tx[7]);
             require(
-                IERC20(erc20).transfer(_recipient, _tx[6]),
+                IERC20(erc20).transfer(msg.sender, _tx[6]),
                 "transfer failed"
             );
         }
