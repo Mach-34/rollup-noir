@@ -11,7 +11,7 @@
       "useUnknownInCatchVariables": false,
     },
     "include": [
-      "src", "modules.d.ts", "./scripts"
+      "src", "modules.d.ts", "./scripts",
     ],
-    "files": ["./hardhat.config.ts"]
+    "files": ["./hardhat.config.ts"],
   }
