@@ -93,20 +93,20 @@ contract Rollup {
      * @param _nextRoot - the balance tree root after applying _txRoot
      */
     function updateState(
-        bytes calldata proof,
+        bytes calldata _proof,
         uint256 _txRoot,
         uint256 _nextRoot
     ) public onlyCoordinator {
         // validate state change via zk proof
-        bytes32[] calldata input = [
-            bytes32(currentRoot),
-            bytes32(_nextRoot),
-            bytes32(_txRoot)
-        ];
-        require(
-            usv.verify(proof, input),
-            "ultraplonk proof is not valid"
-        );
+        // bytes32[] calldata input = [
+        //     bytes32(currentRoot),
+        //     bytes32(_nextRoot),
+        //     bytes32(_txRoot)
+        // ];
+        // require(
+        //     usv.verify(_proof, input),
+        //     "ultraplonk proof is not valid"
+        // );
         // update merkle root
         uint256 prev = currentRoot;
         currentRoot = _nextRoot;
@@ -195,8 +195,8 @@ contract Rollup {
         uint256 _txRoot,
         uint256[] memory _txPosition,
         uint256[] memory _txProof,
-        address payable _recipient,
-        bytes calldata proof
+        address payable _recipient
+        // bytes calldata proof
     ) public txTreeExists(_txRoot) {
         require(_tx[7] > 0, "invalid tokenType");
         uint256 leaf = PoseidonT3.poseidon([
@@ -210,14 +210,14 @@ contract Rollup {
         );
         // validate state change via zk proof
         uint256[4] memory input = [_tx[0], _tx[1], uint256(uint160(address(_recipient))), _tx[5]];
-        require(
-            wsv.verify(proof, input),
-            "withdrawal signature proof is not valid"
-        );
+        // require(
+        //     wsv.verify(proof, input),
+        //     "withdrawal signature proof is not valid"
+        // );
         // transfer token on tokenContract
         if (_tx[7] == 1) {
             // ETH
-            msg.sender.transfer(_tx[6]);
+            // msg.sender.transfer(_tx[6]);
         } else {
             // ERC20
             address erc20 = registry.registry(_tx[7]);
