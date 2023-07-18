@@ -41,7 +41,6 @@ describe("Test rollup", async () => {
         let pubkeys = [point.x, point.y].map(coord => numToHex(coord).slice(2));
 
         // make message
-        let message = [1, 2, 3, 4, 5].map(element => F.toObject(element));
         let messageHash = numToHex(F.toObject(poseidon([1, 2, 3, 4, 5]))).slice(2);
 
         // sign message
