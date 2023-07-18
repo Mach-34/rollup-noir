@@ -74,10 +74,9 @@ async function initializeContracts(zeroCache) {
 /**
  * Generate L2 accounts and associate them with L1 signers by name
  * @param poseidon - instantiated circomlibjs poseidon object
- * @param eddsa - instantiated circomlibjs eddsa object
  * @return dictionary of human-readable account names to L1/L2 signing objects
  */
-async function generateAccounts(poseidon, eddsa) {
+async function generateAccounts(poseidon) {
     const signers = await ethers.getSigners()
     return ['coordinator', 'alice', 'bob', 'charlie', 'david', 'emily', 'frank']
         .map((account, index) => {
@@ -85,7 +84,7 @@ async function generateAccounts(poseidon, eddsa) {
             return {
                 name: account,
                 L1: signers[index],
-                L2: L2Account.genAccount(poseidon, eddsa)
+                L2: L2Account.genAccount(poseidon)
             }
         }).reduce((obj, entry) => {
             obj[entry.name] = {

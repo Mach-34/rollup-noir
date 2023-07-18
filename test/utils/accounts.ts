@@ -15,7 +15,7 @@ export class L2Account {
     /// ACCOUNT STATE ///
     index; // bigint
     prvkey; // bigint
-    pubkey; // bigint[2]
+    // pubkey; // bigint[2]
     balance; // bigint;
     nonce; // bigint;
     tokenType; // bigint
@@ -36,7 +36,6 @@ export class L2Account {
      */
     constructor(
         _poseidon,
-        _eddsa,
         _prvkey,
         _balance = BigInt(0),
         _nonce = BigInt(0),
@@ -47,10 +46,9 @@ export class L2Account {
         this.F = _poseidon.F;
         // set account wallet
         this.prvkey = _prvkey;
-        // this.pubkey = this.eddsa.prv2pub(this.prvkey);
-        let pubkey = secp.getPublicKey(_prvkey);
-        let point = secp.Point.fromHex(pubkey)
-        this.pubkey = [point.x, point.y].map(coord => numToHex(coord).slice(2));
+        // let pubkey = secp.getPublicKey(_prvkey);
+        // let point = secp.Point.fromHex(pubkey)
+        // this.pubkey = [point.x, point.y].map((coord) => numToHex(coord).slice(2));
         // set rollup account
         this.balance = _balance;
         this.nonce = _nonce;
@@ -66,7 +64,7 @@ export class L2Account {
      */
     static emptyRoot(_poseidon) {
         const data = [0, 0, 0, 0, 0];
-        return _poseidon.F.toObject(_poseidon(data));
+        return _poseidon(data);
     }
 
     /**
@@ -74,9 +72,9 @@ export class L2Account {
      * @param {Object} _poseidon - the circomlibjs poseidon hasher
      * @param {Object} _eddsa - the circomlibjs eddsa signer
      */
-    static genAccount(_poseidon, _eddsa) {
+    static genAccount(_poseidon) {
         const prv = secp.utils.bytesToHex(crypto.randomBytes(32))
-        return new L2Account(_poseidon, _eddsa, prv);
+        return new L2Account(_poseidon, prv);
     }
 
     /**
@@ -115,7 +113,7 @@ export class L2Account {
      */
     async sign(data) {
         let messageHex = numToHex(data).slice(2);
-        let signature = await secp.sign(messageHex, this.prvkey);
+        return await secp.sign(messageHex, this.prvkey);
     }
 
     /**
@@ -123,6 +121,11 @@ export class L2Account {
      * @return {bigint[2]} - the account pubkey
      */
     getPubkey() {
-        return this.pubkey.map(point => this.F.toObject(point));
+        let pubkey = secp.getPublicKey(this.prvkey);
+        let point = secp.Point.fromHex(pubkey)
+        let pub =  [point.x, point.y]
+            .map((coord) => numToHex(coord).slice(2))
+            .map(coord => BigInt("0x" + Buffer.from(coord, 'hex').toString('hex')));
+        return pub;
     }
 }
