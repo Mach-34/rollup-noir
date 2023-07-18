@@ -120,7 +120,7 @@ describe("Test Noir Rollup", async () => {
                 to_nonces: [], // array of receiver nonce in bal tree
                 to_bals: [],
                 to_token_types: [],
-                txPath: [],
+                tx_paths: [],
                 from_paths: [],
                 to_paths: [],
                 txRoot: undefined,
@@ -394,7 +394,7 @@ describe("Test Noir Rollup", async () => {
                 const txPath = txTree
                     .createProof(i) // index of bob
                     .siblings.map((sibling) => numToHex(sibling[0]));
-                input.txPath = input.txPath.concat(txPath);
+                input.tx_paths = input.tx_paths.concat(txPath);
             }
 
             // set tx root and output root
