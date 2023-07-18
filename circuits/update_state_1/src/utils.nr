@@ -23,10 +23,10 @@ struct TxLeaf {
 }
 
 // hardcoded to 4 for now
-struct InclusionProof {
+struct InclusionProof<T> {
     root: Field,
     index: Field,
-    path: [Field; 4]
+    path: [Field; T]
 }
 
 // poseidon merkle root computation
@@ -57,7 +57,7 @@ fn tx_leaf_hash(leaf: TxLeaf) -> Field {
     std::hash::poseidon::bn254::hash_2([front, back])
 }
 
-fn leaf_exists(leaf_hash: Field, proof: InclusionProof) {
+fn leaf_exists<T>(leaf_hash: Field, proof: InclusionProof<T>) {
     // check hash exists in tree
     let root = compute_merkle_root_poseidon(leaf_hash, proof.index, proof.path);
     assert(root == proof.root);

@@ -68,7 +68,7 @@ fn main(
 
         // leaf_exists(tx_leaf, InclusionProof { 
         //     index: i,
-        //     path: [tx_paths[i * 4], tx_paths[i * 4 + 1], tx_paths[i * 4 + 2], tx_paths[i * 4 + 3]], 
+        //     path: [tx_paths[i * 2], tx_paths[i * 2 + 1]], 
         //     root: tx_root
         // });
 
