@@ -31,8 +31,8 @@ fn main(
     to_paths: [Field; 16],
     to_token_types: [Field; 4], 
     tx_paths: [Field; 16],
-    tx_root: Field
-    ) {
+    tx_root: pub Field
+) -> pub Field {
     
     // let NONCE_MAX_VALUE = 100;
 
