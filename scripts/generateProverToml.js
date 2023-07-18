@@ -30,7 +30,6 @@ const generateTransactions = (accounts) => {
       fromIndex: 2,
       to: accounts[0].pub,
       toIndex: 1,
-      nonce: 0,
       amount: 100,
       tokenType: 1,
     },
@@ -39,7 +38,6 @@ const generateTransactions = (accounts) => {
       fromIndex: 2,
       to: accounts[0].pub,
       toIndex: 1,
-      nonce: 2,
       amount: 37,
       tokenType: 1,
     },
@@ -48,7 +46,6 @@ const generateTransactions = (accounts) => {
       fromIndex: 3,
       to: accounts[1].pub,
       toIndex: 2,
-      nonce: 2,
       amount: 6,
       tokenType: 1,
     },
@@ -57,11 +54,10 @@ const generateTransactions = (accounts) => {
       fromIndex: 1,
       to: accounts[2].pub,
       toIndex: 3,
-      nonce: 3,
       amount: 95,
       tokenType: 1,
     },
-  ].slice(0, 1);
+  ];
   return transactions;
 };
 
@@ -75,21 +71,21 @@ const numToHex = (num) => {
 const input = {
   amount: [], // array of L2 transaction values
   bal_root: undefined,
-  from: [], // array of sender eddsa keys
-  from_balance: [], // array of sender balances
-  from_index: [], // array of sender index in balance tree
-  from_nonce: [], // array of sender nonce for tx
-  from_path: [],
-  from_token_type: [], // array of sender token types
+  from_pubkeys: [], // array of sender eddsa keys
+  from_bals: [], // array of sender balances
+  from_indeces: [], // array of sender index in balance tree
+  from_nonces: [], // array of sender nonce for tx
+  from_paths: [],
+  from_token_types: [], // array of sender token types
   intermediate_roots: [],
-  to: [], // array of receiver eddsa keys x
-  to_balance: [],
-  to_index: [],
-  to_nonce: [], // array of receiver nonce in bal tree
-  to_path: [],
-  to_token_type: [],
+  to_pubkeys: [], // array of receiver eddsa keys x
+  to_bals: [],
+  to_indeces: [],
+  to_nonces: [], // array of receiver nonce in bal tree
+  to_paths: [],
+  to_token_types: [],
   tx_root: undefined,
-  tx_path: [],
+  tx_paths: [],
   // signature: [], // array of signatures by sender eddsa key on tx data
   // txPath: [],
   // txRoot: undefined,
@@ -97,29 +93,23 @@ const input = {
 };
 
 const toToml = (input) => {
-  let amount = input.amount[0];
+  let amount = input.amount;
   let bal_root = input.bal_root;
-  let from = {
-    x: input.from[0][0],
-    y: input.from[0][1],
-  };
-  let from_bal = input.from_balance[0];
-  let from_index = input.from_index[0];
-  let from_nonce = input.from_nonce[0];
-  let from_path = input.from_path[0];
-  let from_token_type = input.from_token_type[0];
-  let intermediate_roots = input.intermediate_roots[0];
-  let to = {
-    x: input.to[0][0],
-    y: input.to[0][1],
-  };
-  let to_bal = input.to_balance[0];
-  let to_index = input.to_index[0];
-  let to_nonce = input.to_nonce[0];
-  let to_path = input.to_path[0];
-  let to_token_type = input.to_token_type[0];
+  let from_pubkeys = input.from_pubkeys;
+  let from_bals = input.from_bals;
+  let from_indeces = input.from_indeces;
+  let from_nonces = input.from_nonces;
+  let from_paths = input.from_paths;
+  let from_token_types = input.from_token_types;
+  let intermediate_roots = input.intermediate_roots;
+  let to_pubkeys = input.to_pubkeys;
+  let to_bals = input.to_bals;
+  let to_indeces = input.to_indeces;
+  let to_nonces = input.to_nonces;
+  let to_paths = input.to_paths;
+  let to_token_types = input.to_token_types;
   let tx_root = input.tx_root;
-  let tx_path = input.tx_path[0];
+  let tx_paths = input.tx_paths;
   // let signature = input.signature[0];
   // let nextRoot = input.nextRoot;
   writeFileSync(
@@ -127,21 +117,22 @@ const toToml = (input) => {
     stringify({
       amount,
       bal_root,
-      from,
-      from_bal,
-      from_index,
-      from_nonce,
-      from_path,
-      from_token_type,
+      from_pubkeys,
+      from_bals,
+      from_indeces,
+      from_nonces,
+      from_paths,
+      from_token_types,
       intermediate_roots,
-      to,
-      to_bal,
-      to_index,
-      to_nonce,
-      to_path,
-      to_token_type,
+      // num_txs: 4,
+      to_pubkeys,
+      to_bals,
+      to_indeces,
+      to_nonces,
+      to_paths,
+      to_token_types,
       tx_root,
-      tx_path,
+      tx_paths,
       // nextRoot,
     })
   );
@@ -163,7 +154,7 @@ const toToml = (input) => {
     [0, 0, 0, 0, 0], // empty root
     [accounts[0].pub[0], accounts[0].pub[1], 100, 1, 1],
     [accounts[1].pub[0], accounts[1].pub[1], 200, 0, 1],
-    [accounts[2].pub[0], accounts[2].pub[1], 0, 3, 1],
+    [accounts[2].pub[0], accounts[2].pub[1], 24, 3, 1],
   ];
 
   const hashes = balanceLeaves.map((leaf) => poseidon(leaf));
@@ -228,28 +219,38 @@ const toToml = (input) => {
 
     const newReceiverLeafHash = F.toObject(poseidon(newReceiverLeaf));
     balanceTree.update(toIndex, newReceiverLeafHash);
+    // Save all but last intermediate root
+    if (i !== transactions.length - 1) {
+      intermediateRoots.push(numToHex(balanceTree.root));
+    }
     const receiverPath = balanceTree
       .createProof(toIndex)
       .siblings.map((sibling) => numToHex(sibling[0]));
 
     input.amount.push(amount);
     input.bal_root = numToHex(oldRoot);
-    input.from.push(
-      accounts[fromIndex - 1].pub.map((point) => numToHex(point))
+    input.from_pubkeys.push(
+      ...Object.values(accounts[fromIndex - 1].pub).map((point) =>
+        numToHex(point)
+      )
     );
-    input.intermediate_roots.push(intermediateRoots);
-    input.from_balance.push(fromBalance);
-    input.from_index.push(fromIndex);
-    input.from_nonce.push(fromNonce);
-    input.from_path.push(senderPath);
-    input.from_token_type.push(1);
-    input.to.push(accounts[toIndex - 1].pub.map((point) => numToHex(point)));
-    input.to_balance.push(toBalance);
-    input.to_index.push(toIndex);
-    input.to_nonce.push(toNonce);
-    input.to_path.push(receiverPath);
-    input.to_token_type.push(1);
-    input.tx_path.push(txPath);
+    input.intermediate_roots.push(...intermediateRoots);
+    input.from_bals.push(fromBalance);
+    input.from_indeces.push(fromIndex);
+    input.from_nonces.push(fromNonce);
+    input.from_paths.push(...senderPath);
+    input.from_token_types.push(1);
+    input.to_pubkeys.push(
+      ...Object.values(accounts[toIndex - 1].pub).map((point) =>
+        numToHex(point)
+      )
+    );
+    input.to_bals.push(toBalance);
+    input.to_indeces.push(toIndex);
+    input.to_nonces.push(toNonce);
+    input.to_paths.push(...receiverPath);
+    input.to_token_types.push(1);
+    input.tx_paths.push(...txPath);
     input.tx_root = txRoot;
     // input.signature.push(0);
 

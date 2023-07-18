@@ -8,7 +8,7 @@ struct Pubkey {
 
 struct BalanceLeaf {
     pubkey: Pubkey,
-    balance: u32,
+    balance: u126,
     nonce: Field,
     token_type: Field
 }
@@ -18,7 +18,7 @@ struct TxLeaf {
     from_index: Field,
     to: Pubkey,
     nonce: Field,
-    amount: u32,
+    amount: u126,
     token_type: Field
 }
 
@@ -52,7 +52,9 @@ fn balance_leaf_hash(leaf: BalanceLeaf) -> Field {
 }
 
 fn tx_leaf_hash(leaf: TxLeaf) -> Field {
-    std::hash::poseidon::bn254::hash_8([leaf.from.x, leaf.from.y, leaf.from_index, leaf.to.x, leaf.to.y, leaf.nonce, leaf.amount as Field, leaf.token_type])
+    let front = std::hash::poseidon::bn254::hash_4([leaf.from.x, leaf.from.y, leaf.from_index, leaf.to.x]);
+    let back = std::hash::poseidon::bn254::hash_4([leaf.to.y, leaf.nonce, leaf.amount as Field, leaf.token_type]);
+    std::hash::poseidon::bn254::hash_2([front, back])
 }
 
 fn leaf_exists(leaf_hash: Field, proof: InclusionProof) {
@@ -104,7 +106,7 @@ fn tx_leaf_smoke() {
         token_type: 8
     };
     let hash = tx_leaf_hash(leaf);
-    assert(hash == 18604317144381847857886385684060986177838410221561136253933256952257712543953);
+    assert(hash == 10338625729162463398541084174035223994976596358038685478464815845052942941177);
 }
 
 #[test]
