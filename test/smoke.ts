@@ -9,7 +9,7 @@ const numToHex = (num) => {
     // Add missing padding based of hex number length
     const padded = `${'0'.repeat(64 - hex.length)}${hex}`;
     return `0x${Buffer.from(padded, 'hex').toString('hex')}`;
-  };
+};
 
 describe("Test rollup", async () => {
     let eddsa, poseidon, _poseidon, F, zeroCache, treeDepth, bb, bjj
@@ -33,29 +33,23 @@ describe("Test rollup", async () => {
         }
     });
 
-    it("should sign with poseidon", async () => {
+    it("ecdsa", async () => {
         // make account
-        // let bytes = crypto.randomBytes(32);
-        let bytes = Buffer.from("5049aa9160a5bcc3d80a60a3d3d5e40a106c3cec52583362f894fd4ca9c868f8", 'hex');
-        let account = {
-            private: bytes,
-            public: eddsa.prv2pub(bytes).map(point => F.toObject(point))
-        }
+        let key = "5049aa9160a5bcc3d80a60a3d3d5e40a106c3cec52583362f894fd4ca9c868f8"
+        let pubkey = secp.getPublicKey("5049aa9160a5bcc3d80a60a3d3d5e40a106c3cec52583362f894fd4ca9c868f8");
+        let point = secp.Point.fromHex(pubkey)
+        let pubkeys = [point.x, point.y].map(coord => numToHex(coord).slice(2));
 
         // make message
         let message = [1, 2, 3, 4, 5].map(element => F.toObject(element));
-        let messageHash = poseidon([1, 2, 3, 4, 5]);
-        // console.log("A", F.toObject(messageHash))
-        console.log("B", numToHex(F.fromObject(messageHash)) )
+        let messageHash = numToHex(F.toObject(poseidon([1, 2, 3, 4, 5]))).slice(2);
 
         // sign message
-        let signature = eddsa.signPoseidon(account.private, messageHash);
-        // console.log("signature: ", signature)
-        signature = [...signature.R8.map(point => F.toObject(point)), signature.S]
+        let signature = await secp.sign(messageHash, key);
 
-        // print values for verification
-        // console.log("pubkey", account.public);
-        // console.log("signature", signature);
+        // log hardcodes params for ecdsa smoke test
+        console.log("signature", signature.slice(0, 64));
+        console.log("pubkey: ", pubkeys);
     })
 
     xit("should produce hash for tx leaf", async () => {
@@ -134,31 +128,11 @@ describe("Test rollup", async () => {
         // console.log("poseidonT3ABI", poseidonT3ABI);
         // console.log("poseidonT3Bytecode", poseidonT3Bytecode);
 
-        // const poseidonT6ABI = poseidonContract.generateABI(5);
-        // const poseidonT6Bytecode = poseidonContract.createCode(5);
-        
+        const poseidonT6ABI = poseidonContract.generateABI(5);
+        const poseidonT6Bytecode = poseidonContract.createCode(5);
+
         // console.log("poseidonT6ABI", poseidonT6ABI);
         // console.log("poseidonT6Bytecode", poseidonT6Bytecode);
     })
-
-    xit("eddsa", async () => {
-        let key = Buffer.from("4411fa416d3e9c18fc0d353b1e035bd6f387e99595255c93ce7f4395010eaf4d", "hex");
-        let keyObj = F.toObject(F.fromObject("0x4411fa416d3e9c18fc0d353b1e035bd6f387e99595255c93ce7f4395010eaf4d"));
-        let message = F.toObject(poseidon([1n, 2n, 3n, 4n, 5n]));
-        let ra = (await bb.pedersenPlookupCompress([keyObj, message])).value % bjj.subOrder
-        console.log("ra_hash", ra)
-        let ra1 = bjj.add
-    })
-
-    // it("schnorr / pedersen commits", async () => {
-    //     let key = Buffer.from("4411fa416d3e9c18fc0d353b1e035bd6f387e99595255c93ce7f4395010eaf4d", "hex");
-    //     console.log("key", key)
-    //     let pubkey = bb.schnorrComputePublicKey(key);
-    //     pubkey = {
-    //         x: pubkey.x.value,
-    //         y: pubkey.y.value
-    //     }
-    //     console.log("pubkey", pubkey);
-    // })
 })
 

@@ -3,6 +3,13 @@ import { poseidonContract } from 'circomlibjs'
 import { L2Account } from './accounts';
 import crypto from 'crypto'
 
+const numToHex = (num) => {
+    const hex = num.toString(16);
+    // Add missing padding based of hex number length
+    const padded = `${'0'.repeat(64 - hex.length)}${hex}`;
+    return `0x${Buffer.from(padded, 'hex').toString('hex')}`;
+};
+
 async function initializeContracts(zeroCache) {
     // get deploying account
     const [operator] = await ethers.getSigners();
@@ -91,7 +98,8 @@ async function generateAccounts(poseidon, eddsa) {
 
 export {
     initializeContracts,
-    compileCircuits,
+    numToHex,
+    // compileCircuits,
     generateAccounts,
     L2Account
 }
