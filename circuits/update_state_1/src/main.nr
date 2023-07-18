@@ -82,7 +82,7 @@ fn main(
             y: from_pubkeys[i * 2 + 1]
         };
 
-        // signed_leaf(tx_leaf, pubkey, signature);
+        signed_leaf(tx_leaf, pubkey, signature);
 
         // Check tx sender balance exists
         let from_bal_leaf = balance_leaf_hash(BalanceLeaf { 
@@ -177,112 +177,112 @@ fn main(
 
 #[test]
 fn hardcoded_no_time() {
-    let from_pubkeys = [
-        0x8b8cbd7965656f7b552ccd2b89e64a107012642456bfcd15039ecaa74b3e6dfc,
-        0xa350d2706cc6742254bea0d07961e8462d51ce65a255c959548e5d6016d632da
-    ];
-    let to_pubkeys = [
-        0xef796c2b9d7ccbcdea9505a89a88d404ab1a25acced1a25a5d0040ab18e05a48,
-        0x7abdd9582e3d984f3266fc97acd94d44216fd87a8e4d53efe31c5e0b16021d83
-    ];
-    let amount = [ 200 ];
-    let from_indeces = [ 2 ];
-    let from_nonces = [ 0 ];
-    let from_token_types = [ 1 ];
-    let from_bals = [
-        0x0000000000000000000000000000000000000000000000000000000000009c40
-    ];
-    let to_nonces = [ 0 ];
-    let to_bals = [
-        0x000000000000000000000000000000000000000000000000000000000000000f
-    ];
-    let to_token_types = [ 1 ];
-    let tx_paths = [
-        0x1ee9416ff6b676a92e8ca07083a1ffd86147ec3b65fb590058add34b5695170a,
-        0x1948b5e9c93c4dafd504eddd7871fb9010be1a1cd2ce2ca50f53460322de1f1f,
-    ];
-    let from_paths = [
-        0x1431d9f800f029d5c98023f38b0b30063af60e8a5f72e0b9fba8bac0a4e8b1e2,
-        0x305c340ca0068202374dad283f56aa3a80b3195b861688e8ee91fee4b420c05d,
-        0x1069673dcdb12263df301a6ff584a7ec261a44cb9dc68df067a4774460b1f1e1,
-        0x18f43331537ee2af2e3d758d50f72106467c6eea50371dd528d57eb2b856d238
-    ];
-    let to_paths = [
-        0x1ba2535109abad7b7d1fafd800e6099e4773446f85385d20d3949b6336bd0110,
-        0x305c340ca0068202374dad283f56aa3a80b3195b861688e8ee91fee4b420c05d,
-        0x1069673dcdb12263df301a6ff584a7ec261a44cb9dc68df067a4774460b1f1e1,
-        0x18f43331537ee2af2e3d758d50f72106467c6eea50371dd528d57eb2b856d238
-    ];
-    let tx_root = 0x1f437f063bba48c0b3d265483fcac96d56e6a0c1096c0fa2d5118ed637ac6666;
-    let bal_root = 0x2ca891617e89824c8a6b50c218a019980ab2e4df050173153438ca478825f1cd;
-    let next_root = 0x0f2799e8c3234c1e2190b67e5e60e10f8bec372addf3a9bdf93d86f178d3c8e1;
-    let signatures = [
-        48,
-        69,
-        2,
-        33,
-        0,
-        229,
-        234,
-        15,
-        67,
-        19,
-        24,
-        14,
-        232,
-        125,
-        163,
-        16,
-        199,
-        226,
-        13,
-        233,
-        81,
-        21,
-        36,
-        210,
-        231,
-        236,
-        25,
-        66,
-        200,
-        118,
-        219,
-        33,
-        156,
-        177,
-        237,
-        56,
-        188,
-        2,
-        32,
-        100,
-        145,
-        32,
-        148,
-        207,
-        78,
-        48,
-        255,
-        42,
-        29,
-        209,
-        12,
-        165,
-        91,
-        11,
-        101,
-        177,
-        167,
-        185,
-        160,
-        89,
-        201,
-        3,
-        97,
-        49
-    ];
-    let to_indeces = [ 3 ];
+   let from_pubkeys = [
+  0xaa4420338856e860066c20b74d9b025557fd5858298069793617455d423611b2,
+  0x8a6d7f582f4f055f2351dafcd918ac2f58dfc26f82cc3a22d6ab731e601d2357
+];
+let to_pubkeys = [
+  0x9926713e3b996beb36fd1c829beeecdc5dedfb0f0147ef91e77c58de042de4ca,
+  0x6a1bd8c96c43f9ec19e72f9a1961e23f8851a025667eae5bbd50f941135bf74b
+];
+let amount = [ 200 ];
+let from_indeces = [ 2 ];
+let from_nonces = [ 0 ];
+let from_token_types = [ 1 ];
+let from_bals = [
+  0x0000000000000000000000000000000000000000000000000000000000009c40
+];
+let to_nonces = [ 0 ];
+let to_bals = [
+  0x000000000000000000000000000000000000000000000000000000000000000f
+];
+let to_token_types = [ 1 ];
+let tx_paths = [
+  0x2aa7f74429382ee3d696b518637485fdb838680f6609fa24a10ce73ab5c22d9f,
+  0x0c6b24b21ec1f797e0d87bdbabf2af4590ff8fbd611cbe498f2778437f76e203
+];
+let from_paths = [
+  0x113e4420c1e584dfa261a07ac94aefa92cbf1908fcde687ebe2dec301a3a5855,
+  0x207c4d21735059bc3ab0c41c9f0569ca96a9369994e3b4f2958cca919b5bce03,
+  0x1069673dcdb12263df301a6ff584a7ec261a44cb9dc68df067a4774460b1f1e1,
+  0x18f43331537ee2af2e3d758d50f72106467c6eea50371dd528d57eb2b856d238
+];
+let to_paths = [
+  0x0a6806bd9baecbeaedc8e9594232bf892cdb5e126f30c380bd75ee3877e52400,
+  0x207c4d21735059bc3ab0c41c9f0569ca96a9369994e3b4f2958cca919b5bce03,
+  0x1069673dcdb12263df301a6ff584a7ec261a44cb9dc68df067a4774460b1f1e1,
+  0x18f43331537ee2af2e3d758d50f72106467c6eea50371dd528d57eb2b856d238
+];
+let to_indeces = [ 3 ];
+let tx_root = 0x04b0c3cc8e474db4ebf927199f7bec4f86c50ae2d894d7dfbd68541af57a5b36;
+let bal_root = 0x02bea43cc144dd22bd403328932d59bc9fb3a13d13f64c534e01073698b3a492;
+let next_root = 0x2a3db810e165adeedb61b4237d836e62d870c46f272c15581bee7a04c8bc3d15;
+let signatures = [
+  48,
+  69,
+  2,
+  33,
+  0,
+  195,
+  44,
+  72,
+  26,
+  130,
+  77,
+  124,
+  32,
+  218,
+  0,
+  33,
+  69,
+  100,
+  142,
+  178,
+  240,
+  224,
+  120,
+  225,
+  155,
+  195,
+  250,
+  100,
+  97,
+  248,
+  18,
+  214,
+  145,
+  151,
+  179,
+  153,
+  62,
+  2,
+  32,
+  75,
+  63,
+  170,
+  235,
+  248,
+  23,
+  137,
+  141,
+  240,
+  91,
+  243,
+  24,
+  213,
+  126,
+  122,
+  252,
+  38,
+  214,
+  98,
+  51,
+  46,
+  37,
+  5,
+  70,
+  213
+];
     crate::main(
         amount,
         bal_root,
@@ -303,3 +303,4 @@ fn hardcoded_no_time() {
         tx_root
     );
 }
+
