@@ -6,3 +6,4 @@ artifacts
 cache
 /circuits/src/target
 /circuits/src/proof
+bb.js
