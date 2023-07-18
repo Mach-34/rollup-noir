@@ -1,4 +1,6 @@
 import crypto from 'crypto';
+import * as secp from "@noble/secp256k1";
+import { numToHex } from './index';
 
 /**
  * @title Offchain (EdDSA) account state
@@ -42,11 +44,13 @@ export class L2Account {
     ) {
         // assign circomlibjs helpers
         this.poseidon = _poseidon;
-        this.eddsa = _eddsa;
         this.F = _poseidon.F;
         // set account wallet
         this.prvkey = _prvkey;
-        this.pubkey = this.eddsa.prv2pub(this.prvkey);
+        // this.pubkey = this.eddsa.prv2pub(this.prvkey);
+        let pubkey = secp.getPublicKey(_prvkey);
+        let point = secp.Point.fromHex(pubkey)
+        this.pubkey = [point.x, point.y].map(coord => numToHex(coord).slice(2));
         // set rollup account
         this.balance = _balance;
         this.nonce = _nonce;
@@ -71,7 +75,7 @@ export class L2Account {
      * @param {Object} _eddsa - the circomlibjs eddsa signer
      */
     static genAccount(_poseidon, _eddsa) {
-        const prv = crypto.randomBytes(32);
+        const prv = secp.utils.bytesToHex(crypto.randomBytes(32))
         return new L2Account(_poseidon, _eddsa, prv);
     }
 
@@ -105,13 +109,13 @@ export class L2Account {
     }
 
     /**
-     * Sign a message with the account's private key using Poseidon EdDSA
+     * Sign a message with the account's private key using ECDSA
      * @param {bigint} data - the data for this account to sign
      * @return {bigint} - a signature on the data by this account
      */
-    sign(data) {
-        const signature = this.eddsa.signPoseidon(this.prvkey, data);
-        return [...signature.R8.map(point => this.F.toObject(point)), signature.S];
+    async sign(data) {
+        let messageHex = numToHex(data).slice(2);
+        let signature = await secp.sign(messageHex, this.prvkey);
     }
 
     /**

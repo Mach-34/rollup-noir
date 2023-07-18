@@ -1,19 +1,29 @@
-import { buildEddsa, buildPoseidon, buildPedersenHash, poseidonContract } from 'circomlibjs'
+import { buildEddsa, buildPoseidon, buildPedersenHash, poseidonContract, buildBabyjub } from 'circomlibjs'
 import { IncrementalMerkleTree } from '@zk-kit/incremental-merkle-tree'
-
 import crypto from 'crypto';
+import { Scalar } from "ffjavascript";
+import * as secp from "@noble/secp256k1";
+
+const numToHex = (num) => {
+    const hex = num.toString(16);
+    // Add missing padding based of hex number length
+    const padded = `${'0'.repeat(64 - hex.length)}${hex}`;
+    return `0x${Buffer.from(padded, 'hex').toString('hex')}`;
+};
 
 describe("Test rollup", async () => {
-    let eddsa, poseidon, _poseidon, F, zeroCache, treeDepth
-    let BarretenbergWasm, bb, barretenberg
+    let eddsa, poseidon, _poseidon, F, zeroCache, treeDepth, bb, bjj
+    let BarretenbergWasm, barretenberg
 
     before(async () => {
-        // bb = await (await import("bb.js")).newBarretenbergApiAsync();
+        bb = (await (await import("bb.js")).newBarretenbergApiAsync());
+        bb
         eddsa = await buildEddsa();
         poseidon = await buildPoseidon();
         _poseidon = (data) => F.toObject(poseidon(data));
         treeDepth = 4
         F = poseidon.F;
+        bjj = await buildBabyjub();
 
         zeroCache = [BigInt(0)];
         for (let i = 1; i <= treeDepth; i++) {
@@ -23,28 +33,23 @@ describe("Test rollup", async () => {
         }
     });
 
-    xit("should sign with poseidon", async () => {
+    it("ecdsa", async () => {
         // make account
-        // let bytes = crypto.randomBytes(32);
-        let bytes = Buffer.from("5049aa9160a5bcc3d80a60a3d3d5e40a106c3cec52583362f894fd4ca9c868f8", 'hex');
-        console.log("raw", bytes);
-        let account = {
-            private: bytes,
-            public: eddsa.prv2pub(bytes).map(point => F.toObject(point))
-        }
+        let key = "5049aa9160a5bcc3d80a60a3d3d5e40a106c3cec52583362f894fd4ca9c868f8"
+        let pubkey = secp.getPublicKey("5049aa9160a5bcc3d80a60a3d3d5e40a106c3cec52583362f894fd4ca9c868f8");
+        let point = secp.Point.fromHex(pubkey)
+        let pubkeys = [point.x, point.y].map(coord => numToHex(coord).slice(2));
 
         // make message
         let message = [1, 2, 3, 4, 5].map(element => F.toObject(element));
-        let messageHash = poseidon(message);
+        let messageHash = numToHex(F.toObject(poseidon([1, 2, 3, 4, 5]))).slice(2);
 
         // sign message
-        let signature = eddsa.signPoseidon(account.private, messageHash);
-        console.log("signature: ", signature)
-        signature = [...signature.R8.map(point => F.toObject(point)), signature.S]
+        let signature = await secp.sign(messageHash, key);
 
-        // print values for verification
-        console.log("pubkey", account.public);
-        console.log("signature", signature);
+        // log hardcodes params for ecdsa smoke test
+        console.log("signature", signature.slice(0, 64));
+        console.log("pubkey: ", pubkeys);
     })
 
     it("should produce hash for tx leaf", async () => {
@@ -116,16 +121,16 @@ describe("Test rollup", async () => {
         console.log("root: ", tree.root)
     })
 
-    it("pedersen merkle tree", async () => {
+    xit("pedersen merkle tree", async () => {
         const poseidonT3ABI = poseidonContract.generateABI(2);
         const poseidonT3Bytecode = poseidonContract.createCode(2);
 
         // console.log("poseidonT3ABI", poseidonT3ABI);
         // console.log("poseidonT3Bytecode", poseidonT3Bytecode);
 
-        // const poseidonT6ABI = poseidonContract.generateABI(5);
-        // const poseidonT6Bytecode = poseidonContract.createCode(5);
-        
+        const poseidonT6ABI = poseidonContract.generateABI(5);
+        const poseidonT6Bytecode = poseidonContract.createCode(5);
+
         // console.log("poseidonT6ABI", poseidonT6ABI);
         // console.log("poseidonT6Bytecode", poseidonT6Bytecode);
     })

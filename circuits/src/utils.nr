@@ -1,14 +1,9 @@
 use dep::std;
+use dep::std::ec::consts::te::baby_jubjub;
 
 struct Pubkey {
     x: Field,
     y: Field
-}
-
-struct Signature {
-    r8_x: Field,
-    r8_y: Field,
-    s: Field
 }
 
 struct BalanceLeaf {
@@ -66,17 +61,24 @@ fn leaf_exists(leaf_hash: Field, proof: InclusionProof) {
     assert(root == proof.root);
 }
 
-fn leaf_signed(leaf_hash: Field, pubkey: Pubkey, signature: Signature) {
-    let sig = std::eddsa::eddsa_poseidon_verify(
-        pubkey.x,
-        pubkey.y,
-        signature.s,
-        signature.r8_x,
-        signature.r8_y,
-        leaf_hash
-    );
-    std::println(sig);
-    assert(sig);
+fn signed_leaf(leaf_hash: Field, pubkey: Pubkey, signature: [u8; 64]) {
+    // decompose field into bytes
+    let hash_bytes = leaf_hash.to_be_bytes(32);
+    let x_bytes = pubkey.x.to_be_bytes(32);
+    let y_bytes = pubkey.y.to_be_bytes(32);
+
+    // copy bytes into correctly sized arrays
+    let mut hash_arr = [0; 32];
+    let mut x_arr = [0; 32];
+    let mut y_arr = [0; 32];
+    for i in 0..32 {
+        hash_arr[i] = hash_bytes[i];
+        x_arr[i] = x_bytes[i];
+        y_arr[i] = y_bytes[i];
+    }
+
+    // verify signature
+    std::ecdsa_secp256k1::verify_signature(x_arr, y_arr, signature, hash_arr);
 }
 
 #[test]
@@ -88,7 +90,7 @@ fn balance_leaf_smoke() {
         token_type: 5
     };
     let hash = balance_leaf_hash(leaf);
-    assert(hash == 0x0dab9449e4a1398a15224c0b15a49d598b2174d305a316c918125f8feeb123c0);
+    assert(hash == 6183221330272524995739186171720101788151706631170188140075976616310159254464);
 }
 
 #[test]
@@ -121,31 +123,51 @@ fn balance_leaf_hash_smoke() {
 #[test]
 fn test_pedersen() {
     let hash = std::hash::pedersen([1, 2, 3, 4, 5]);
-    std::println(hash);
     let expected = 10794459586154443268856875458305400297463667634167567592475511904802857085222;
     assert(expected == hash[0]);
 }
 
-// #[test]
-// fn leaf_signed_smoke() {
-//     let leaf = BalanceLeaf {
-//         pubkey: Pubkey {x: 1, y: 2},
-//         balance: 3,
-//         nonce: 4,
-//         token_type: 5
-//     };
-//     let hash = balance_leaf_hash(leaf);
+#[test]
+fn compute_merkle_root_poseidon_smoke() {
+    // compute leaf hash
+    let leaf = BalanceLeaf {
+        pubkey: Pubkey {
+            x: 7660126285266445286548324255609813871639407507152527639553716363917170804277,
+            y: 11419010026410334240551877080760791434837049736904505893713114771266686468710
+        },
+        balance: 200,
+        nonce: 0,
+        token_type: 1
+    };
+    let hash = balance_leaf_hash(leaf);
+    // hardcode proof (see 0.js)
+    let index = 2;
+    let expectedRoot = 5735766539539648816700417747761444171779780605970317510153689184814710974970;
+    let path = [
+        9686388100806161308074724616194138161728276585166465104628140895705977187689,
+        4732818058559901513408018651692750856554170670513858096493186557109422001110,
+        7423237065226347324353380772367382631490014989348495481811164164159255474657,
+        11286972368698509976183087595462810875513684078608517520839298933882497716792
+    ];
+    let root = compute_merkle_root_poseidon(hash, index, path);
+    // std::println(root);
+    assert(root == expectedRoot);
+}
 
-//     let pubkey = Pubkey {
-//         x: 12653757428061103024374384205286475483130951369739302427753609032037816464059,
-//         y: 7645647562926909505182629635419116302593333231408581725901243858369176450121
-//     };
-
-//     let signature = Signature {
-//         r8_x: 19847164716083616171251445047044473944329034859355418411967328142519510413295,
-//         r8_y: 7555683800664792576856279407826277085998910420351675657964023460161425542592,
-//         s: 181739666009581525486738516344469887876748881931663077411747898844416001857
-//     };
-
-//     leaf_signed(hash, pubkey, signature);
-// }
+#[test]
+fn signed_leaf_smoke() {
+    let hash = std::hash::poseidon::bn254::hash_5([1, 2, 3, 4, 5]);
+    let pubkey = Pubkey {
+        x: 0x0087a91bf746016aa6b04b478424ae1f86e2373cc5daee38d80460fba09ff5f7,
+        y: 0x95007bc08332e8a27939a8f72d83a6072d05296b030f7490235111874c3d877c
+    };
+    let signature = [
+        48,  68,   2,  32, 100, 245,  70, 135,  88,  74, 225,
+        16, 188, 176, 132,  22, 218, 211,  83,  89, 115, 138,
+        77, 229,  70, 171, 195, 113,  69,  68,  13,  58,  41,
+        30, 169,  48,   2,  32, 117, 195,   8, 227, 230, 148,
+        60,  71, 199,  41,   6,  46, 184, 246,  59, 213, 232,
+        128,  52, 134, 248,  90, 250, 218,  94, 251
+    ];
+    signed_leaf(hash, pubkey, signature);
+}

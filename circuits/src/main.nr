@@ -6,9 +6,9 @@ use crate::utils::{
     compute_merkle_root_poseidon,
     InclusionProof, 
     leaf_exists, 
-    leaf_signed, 
+    // leaf_signed, 
     Pubkey,
-    Signature,
+    // Signature,
     tx_leaf_hash, 
     TxLeaf 
 };
@@ -54,12 +54,12 @@ fn main(
 
     // Assert current state equals first intermediate root
     // assert(bal_root == intermediate_roots[0]);
-
     // Assert transaction exists and that it is signed
     let tx_leaf: Field = tx_leaf_hash(
         TxLeaf {
              amount, 
              from, 
+
              from_index: from_index, 
              nonce: from_nonce, 
              to, 
@@ -78,10 +78,10 @@ fn main(
     assert(to_bal + amount >= to_bal);
     assert(from_nonce != NONCE_MAX_VALUE);
 
-    // // Check token types if not withdraw
-    // // if(to.x == ZERO_ADDRESS.x & to.y == ZERO_ADDRESS.y) {
-    // //     assert(token_type_to == token_type_from);
-    // // }
+    // Check token types if not withdraw
+    // if(to.x == ZERO_ADDRESS.x & to.y == ZERO_ADDRESS.y) {
+    //     assert(token_type_to == token_type_from);
+    // }
 
     // Create new sender
     let new_sender_balance = BalanceLeaf {
