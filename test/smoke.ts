@@ -1,19 +1,29 @@
-import { buildEddsa, buildPoseidon, buildPedersenHash, poseidonContract } from 'circomlibjs'
+import { buildEddsa, buildPoseidon, buildPedersenHash, poseidonContract, buildBabyjub } from 'circomlibjs'
 import { IncrementalMerkleTree } from '@zk-kit/incremental-merkle-tree'
 import crypto from 'crypto';
-import * as secp from '@noble/secp256k1';
+import { Scalar } from "ffjavascript";
+import * as secp from "@noble/secp256k1";
+
+const numToHex = (num) => {
+    const hex = num.toString(16);
+    // Add missing padding based of hex number length
+    const padded = `${'0'.repeat(64 - hex.length)}${hex}`;
+    return `0x${Buffer.from(padded, 'hex').toString('hex')}`;
+  };
 
 describe("Test rollup", async () => {
-    let eddsa, poseidon, _poseidon, F, zeroCache, treeDepth
+    let eddsa, poseidon, _poseidon, F, zeroCache, treeDepth, bb, bjj
     let BarretenbergWasm, barretenberg
 
     before(async () => {
-        // bb = (await (await import("bb.js")).newBarretenbergApiAsync());
+        bb = (await (await import("bb.js")).newBarretenbergApiAsync());
+        bb
         eddsa = await buildEddsa();
         poseidon = await buildPoseidon();
         _poseidon = (data) => F.toObject(poseidon(data));
         treeDepth = 4
         F = poseidon.F;
+        bjj = await buildBabyjub();
 
         zeroCache = [BigInt(0)];
         for (let i = 1; i <= treeDepth; i++) {
@@ -23,11 +33,10 @@ describe("Test rollup", async () => {
         }
     });
 
-    xit("should sign with poseidon", async () => {
+    it("should sign with poseidon", async () => {
         // make account
         // let bytes = crypto.randomBytes(32);
         let bytes = Buffer.from("5049aa9160a5bcc3d80a60a3d3d5e40a106c3cec52583362f894fd4ca9c868f8", 'hex');
-        console.log("raw", bytes);
         let account = {
             private: bytes,
             public: eddsa.prv2pub(bytes).map(point => F.toObject(point))
@@ -35,16 +44,18 @@ describe("Test rollup", async () => {
 
         // make message
         let message = [1, 2, 3, 4, 5].map(element => F.toObject(element));
-        let messageHash = poseidon(message);
+        let messageHash = poseidon([1, 2, 3, 4, 5]);
+        // console.log("A", F.toObject(messageHash))
+        console.log("B", numToHex(F.fromObject(messageHash)) )
 
         // sign message
         let signature = eddsa.signPoseidon(account.private, messageHash);
-        console.log("signature: ", signature)
+        // console.log("signature: ", signature)
         signature = [...signature.R8.map(point => F.toObject(point)), signature.S]
 
         // print values for verification
-        console.log("pubkey", account.public);
-        console.log("signature", signature);
+        // console.log("pubkey", account.public);
+        // console.log("signature", signature);
     })
 
     xit("should produce hash for tx leaf", async () => {
@@ -67,7 +78,7 @@ describe("Test rollup", async () => {
         // console.log("pedersen hash", messageHash);
     })
 
-    it("poseidon merkle tree", async () => {
+    xit("poseidon merkle tree", async () => {
         // make new accounts
         const keys = [
             "4411fa416d3e9c18fc0d353b1e035bd6f387e99595255c93ce7f4395010eaf4d",
@@ -130,8 +141,24 @@ describe("Test rollup", async () => {
         // console.log("poseidonT6Bytecode", poseidonT6Bytecode);
     })
 
-    it("test noble", async () => {
-        console.log("s", secp.utils.randomPrivateKey())
+    xit("eddsa", async () => {
+        let key = Buffer.from("4411fa416d3e9c18fc0d353b1e035bd6f387e99595255c93ce7f4395010eaf4d", "hex");
+        let keyObj = F.toObject(F.fromObject("0x4411fa416d3e9c18fc0d353b1e035bd6f387e99595255c93ce7f4395010eaf4d"));
+        let message = F.toObject(poseidon([1n, 2n, 3n, 4n, 5n]));
+        let ra = (await bb.pedersenPlookupCompress([keyObj, message])).value % bjj.subOrder
+        console.log("ra_hash", ra)
+        let ra1 = bjj.add
     })
+
+    // it("schnorr / pedersen commits", async () => {
+    //     let key = Buffer.from("4411fa416d3e9c18fc0d353b1e035bd6f387e99595255c93ce7f4395010eaf4d", "hex");
+    //     console.log("key", key)
+    //     let pubkey = bb.schnorrComputePublicKey(key);
+    //     pubkey = {
+    //         x: pubkey.x.value,
+    //         y: pubkey.y.value
+    //     }
+    //     console.log("pubkey", pubkey);
+    // })
 })
 

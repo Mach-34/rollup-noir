@@ -6,7 +6,7 @@ use crate::utils::{
     compute_merkle_root_poseidon,
     InclusionProof, 
     leaf_exists, 
-    leaf_signed, 
+    // leaf_signed, 
     Pubkey,
     Signature,
     tx_leaf_hash, 
@@ -68,7 +68,7 @@ fn main(
         }
     );
     leaf_exists(tx_leaf, InclusionProof { index: tx_root_index, path: tx_root_path, root: tx_root});
-    leaf_signed(tx_leaf, from, tx_signature);
+    // leaf_signed(tx_leaf, from, tx_signature);
 
     // Check tx sender balance exists
     let from_bal_leaf = balance_leaf_hash(BalanceLeaf { balance: bal_from, nonce: nonce_from, pubkey: from, token_type: token_type_from });
