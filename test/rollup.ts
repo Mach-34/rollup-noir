@@ -267,3 +267,5 @@ describe("Test Noir Rollup", async () => {
 
             })
         })
+    })
+})
