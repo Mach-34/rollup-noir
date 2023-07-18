@@ -8,7 +8,7 @@ struct Pubkey {
 
 struct BalanceLeaf {
     pubkey: Pubkey,
-    balance: u32,
+    balance: u126,
     nonce: Field,
     token_type: Field
 }
@@ -18,7 +18,7 @@ struct TxLeaf {
     from_index: Field,
     to: Pubkey,
     nonce: Field,
-    amount: u32,
+    amount: u126,
     token_type: Field
 }
 
