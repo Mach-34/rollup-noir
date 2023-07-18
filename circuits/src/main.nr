@@ -8,7 +8,7 @@ use crate::utils::{
     leaf_exists, 
     // leaf_signed, 
     Pubkey,
-    Signature,
+    // Signature,
     tx_leaf_hash, 
     TxLeaf 
 };
@@ -41,7 +41,7 @@ fn main(
     // Path to transaction root. Harcoded to four for now
     tx_root_path: [Field; 4],
     // Transaction signature
-    tx_signature: Signature,
+    // tx_signature: Signature,
     // Depth of transaction tree
     _tx_tree_depth: u32
     )  {
