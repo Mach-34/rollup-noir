@@ -113,7 +113,7 @@ export class L2Account {
      */
     async sign(data) {
         let messageHex = numToHex(data).slice(2);
-        return await secp.sign(messageHex, this.prvkey);
+        return (await secp.sign(messageHex, this.prvkey)).slice(0, 64);
     }
 
     /**

@@ -31,6 +31,7 @@ fn main(
     to_paths: [Field; 16],
     to_token_types: [Field; 4], 
     tx_paths: [Field; 16],
+    signatures: [u8; 256],
     tx_root: pub Field
 ) -> pub Field {
     
