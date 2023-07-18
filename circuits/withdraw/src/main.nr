@@ -8,9 +8,9 @@ use crate::utils::{
 fn main(
     pubkey: Pubkey,
     signature: [u8; 64],
-    recipient: Pubkey,
+    recipient: Field,
     nonce: Field
 ) {
-    let message = std::hash::poseidon::bn254::hash_3([nonce, recipient.x, recipient.y]);
+    let message = std::hash::poseidon::bn254::hash_2([nonce, recipient]);
     signed_leaf(message, pubkey, signature)
 } 
