@@ -45,32 +45,32 @@ fn main(
 
     for i in 0..3 {
 
-    let from = Pubkey {
-        x: from_pubkeys[i],
-        y: from_pubkeys[i + 1]
-    };
+        let from = Pubkey {
+            x: from_pubkeys[i * 2],
+            y: from_pubkeys[i * 2 + 1]
+        };
 
-    let to = Pubkey {
-        x: to_pubkeys[i],
-        y: to_pubkeys[i + 1]
-    };
+        let to = Pubkey {
+            x: to_pubkeys[i * 2],
+            y: to_pubkeys[i * 2 + 1]
+        };
 
-    // Assert transaction exists and that it is signed
-    // let tx_leaf: Field = tx_leaf_hash(
-    //     TxLeaf {
-    //          amount: amount[i], 
-    //          from, 
-    //          from_index: from_indeces[i], 
-    //          nonce: from_nonces[i], 
-    //          to, 
-    //          token_type: from_token_types[i]
-    //     }
-    // );
-    // leaf_exists(tx_leaf, InclusionProof { 
-    //     index: i + 1, 
-    //     path: [tx_paths[i], tx_paths[i + 1], tx_paths[i + 2], tx_paths[i + 3]], 
-    //     root: tx_root
-    // });
+        // Assert transaction exists and that it is signed
+        // let tx_leaf: Field = tx_leaf_hash(
+        //     TxLeaf {
+        //          amount: amount[i], 
+        //          from, 
+        //          from_index: from_indeces[i], 
+        //          nonce: from_nonces[i], 
+        //          to, 
+        //          token_type: from_token_types[i]
+        //     }
+        // );
+        // leaf_exists(tx_leaf, InclusionProof { 
+        //     index: i + 1, 
+        //     path: [tx_paths[i], tx_paths[i + 1], tx_paths[i + 2], tx_paths[i + 3]], 
+        //     root: tx_root
+        // });
     // leaf_signed(tx_leaf, from, tx_signature);
 
     // Check tx sender balance exists
@@ -82,7 +82,12 @@ fn main(
     });
     leaf_exists(from_bal_leaf, InclusionProof { 
         index: from_indeces[i], 
-        path: [from_paths[i], from_paths[i + 1], from_paths[i + 2], from_paths[i + 3]], 
+        path: [
+            from_paths[i * 4],
+            from_paths[i * 4 + 1],
+            from_paths[i * 4 + 2],
+            from_paths[i * 4 + 3]
+        ], 
         root: bal_root
     });
 
