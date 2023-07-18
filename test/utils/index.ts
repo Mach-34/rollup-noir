@@ -102,7 +102,7 @@ async function generateAccounts(poseidon) {
 async function readInNoirProof(proof_inputs) {
     const basePath = resolve(__dirname, '../../circuits')
     console.log('Generating Prover.toml')
-    // writeFileSync(`${basePath}/Prover.toml`, stringify(proof_inputs));
+    writeFileSync(`${basePath}/Prover.toml`, stringify(proof_inputs));
     console.log('Running nargo prove. This may take a bit')
     // Run nargo prove to generate proof file
     execSync('nargo prove p', { cwd: basePath });
