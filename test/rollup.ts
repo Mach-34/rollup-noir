@@ -78,7 +78,7 @@ describe("Test Noir Rollup", async () => {
                 const sibling = poseidon([L2Account.emptyRoot(poseidon), coordinatorLeaf])
                 const current = poseidon([accounts.alice.L2.root, accounts.bob.L2.root]);
                 const expectedRoot = F.toObject(poseidon([sibling, current].map(node => F.toObject(node))));
-                const depositRoot =  (await rollup.describeDeposits())._leaves[0];
+                const depositRoot = (await rollup.describeDeposits())._leaves[0];
                 // expect(expectedRoot).to.be.equal(depositRoot);
                 console.log("expectedRoot", expectedRoot);
                 console.log("depositRoot", depositRoot);

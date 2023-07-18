@@ -13,7 +13,7 @@ interface Accounts {
 
 interface RPCs {
     [key: string]: string;
-  }
+}
 
 // private environment information
 const { INFURA, MNEMONIC, ETHERSCAN, POLYGONSCAN } = process.env
@@ -40,10 +40,10 @@ const accounts: Accounts = {
 
 interface Networks {
     [key: string]: {
-      url?: string,
-      accounts: Accounts
+        url?: string,
+        accounts: Accounts
     };
-  }
+}
 
 /**
  * Return a hardhat compiler for a given version

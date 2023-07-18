@@ -2,6 +2,10 @@ import { ethers } from 'hardhat'
 import { poseidonContract } from 'circomlibjs'
 import { L2Account } from './accounts';
 import crypto from 'crypto'
+import { resolve } from 'path';
+import { execSync } from 'child_process';
+import { readFileSync, write, writeFileSync } from 'fs';
+import { stringify } from '@iarna/toml';
 
 const numToHex = (num) => {
     const hex = num.toString(16);
@@ -96,10 +100,23 @@ async function generateAccounts(poseidon, eddsa) {
         }, {});
 }
 
+async function readInNoirProof(proof_inputs) {
+    const basePath = resolve(__dirname, '../../circuits')
+    console.log('Generating Prover.toml')
+    // writeFileSync(`${basePath}/Prover.toml`, stringify(proof_inputs));
+    console.log('Running nargo prove. This may take a bit')
+    // Run nargo prove to generate proof file
+    execSync('nargo prove p', { cwd: basePath });
+    // Read in proof
+    const proof = readFileSync(resolve(__dirname, `${basePath}/proofs/p.proof`));
+    return proof;
+}
+
 export {
     initializeContracts,
     numToHex,
     // compileCircuits,
     generateAccounts,
+    readInNoirProof,
     L2Account
 }

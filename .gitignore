@@ -4,5 +4,5 @@ barretenberg
 .env
 artifacts
 cache
-/circuits/src/target
-/circuits/src/proof
+/circuits/target
+/circuits/proof
