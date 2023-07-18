@@ -120,7 +120,7 @@ describe("Test Noir Rollup", async () => {
                 to_nonces: [], // array of receiver nonce in bal tree
                 to_bals: [],
                 to_token_types: [],
-                txPath: [],
+                tx_paths: [],
                 from_paths: [],
                 to_paths: [],
                 txRoot: undefined,
@@ -193,8 +193,216 @@ describe("Test Noir Rollup", async () => {
             input.to_paths = input.to_paths.concat(toPath);
             input.signatures = input.signatures.concat(signature);
 
+        });
+
+        it('Bob --{50}--> Coordinator', async () => {
+            // compute inclusion proof & values for sender pre update
+            const value = 50n;
+            const tokenType = 1n;
+            const fromIndex = 3; //index of alice
+            const fromBalance = accounts.bob.L2.balance;
+            const fromNonce = accounts.bob.L2.nonce;
+            const fromPath = tree
+                .createProof(fromIndex)
+                .siblings.map((sibling) => numToHex(sibling[0]));
+
+            // update sender state and recompute balance tree
+            accounts.bob.L2.debit(value);
+            tree.update(fromIndex, accounts.bob.L2.root);
+
+            // compute inclusion proof & values for receiver pre update
+            const toBalance = accounts.coordinator.L2.balance;
+            const toPath = tree
+                .createProof(1) // index of bob
+                .siblings.map((sibling) => numToHex(sibling[0]));
+            
+            // update receiver state and recompute balance tree
+            accounts.coordinator.L2.credit(value);
+            tree.update(1, accounts.bob.L2.root);
+
+            // compute tx leaf
+            let from = accounts.bob.L2.getPubkey();
+            let to = accounts.coordinator.L2.getPubkey();
+            const txData = [
+                ...from,
+                BigInt(fromIndex), // fromIndex
+                ...to,
+                fromNonce, // nonce
+                value, // amount
+                tokenType // tokenType
+            ];
+
+            // compute tx in tx tree inclusion proof
+            const half = txData.length / 2;
+            let front = poseidon(txData.slice(0, half));
+            let back = poseidon(txData.slice(half));
+            const leaf = _poseidon(front, back);
+            txTree.insert(leaf);
+
+            // sign the tx leaf
+            const signature = Array.from(await accounts.bob.L2.sign(leaf));
+
+
+            // add data to input array
+            input.from_pubkeys = input.from_pubkeys.concat(from)
+            input.to_pubkeys = input.to_pubkeys.concat(to)
+            input.amount.push(value);
+            input.from_bals.push(fromBalance);
+            input.from_indeces.push(fromIndex);
+            input.from_nonces.push(fromNonce);
+            input.from_token_types.push(tokenType);
+            input.to_nonces.push(accounts.coordinator.L2.nonce);
+            input.to_bals.push(toBalance);
+            input.to_token_types.push(tokenType);
+            input.from_paths = input.from_paths.concat(fromPath);
+            input.to_paths = input.to_paths.concat(toPath);
+            input.signatures = input.signatures.concat(signature);
+        });
+
+        it('Bob --{20}--> Alice', async () => {
+            // compute inclusion proof & values for sender pre update
+            const value = 20n;
+            const tokenType = 1n;
+            const fromIndex = 3; //index of alice
+            const fromBalance = accounts.bob.L2.balance;
+            const fromNonce = accounts.bob.L2.nonce;
+            const fromPath = tree
+                .createProof(fromIndex)
+                .siblings.map((sibling) => numToHex(sibling[0]));
+
+            // update sender state and recompute balance tree
+            accounts.bob.L2.debit(value);
+            tree.update(fromIndex, accounts.bob.L2.root);
+
+            // compute inclusion proof & values for receiver pre update
+            const toBalance = accounts.alice.L2.balance;
+            const toPath = tree
+                .createProof(2) // index of bob
+                .siblings.map((sibling) => numToHex(sibling[0]));
+            
+            // update receiver state and recompute balance tree
+            accounts.alice.L2.credit(value);
+            tree.update(2, accounts.alice.L2.root);
+
+            // compute tx leaf
+            let from = accounts.bob.L2.getPubkey();
+            let to = accounts.alice.L2.getPubkey();
+            const txData = [
+                ...from,
+                BigInt(fromIndex), // fromIndex
+                ...to,
+                fromNonce, // nonce
+                value, // amount
+                tokenType // tokenType
+            ];
+
+            // compute tx in tx tree inclusion proof
+            const half = txData.length / 2;
+            let front = poseidon(txData.slice(0, half));
+            let back = poseidon(txData.slice(half));
+            const leaf = _poseidon(front, back);
+            txTree.insert(leaf);
+
+            // sign the tx leaf
+            const signature = Array.from(await accounts.bob.L2.sign(leaf));
+
+
+            // add data to input array
+            input.from_pubkeys = input.from_pubkeys.concat(from)
+            input.to_pubkeys = input.to_pubkeys.concat(to)
+            input.amount.push(value);
+            input.from_bals.push(fromBalance);
+            input.from_indeces.push(fromIndex);
+            input.from_nonces.push(fromNonce);
+            input.from_token_types.push(tokenType);
+            input.to_nonces.push(accounts.alice.L2.nonce);
+            input.to_bals.push(toBalance);
+            input.to_token_types.push(tokenType);
+            input.from_paths = input.from_paths.concat(fromPath);
+            input.to_paths = input.to_paths.concat(toPath);
+            input.signatures = input.signatures.concat(signature);
+        });
+
+        it('Coordinator --{17}--> Alice', async () => {
+            // compute inclusion proof & values for sender pre update
+            const value = 17n;
+            const tokenType = 1n;
+            const fromIndex = 1; //index of alice
+            const fromBalance = accounts.coordinator.L2.balance;
+            const fromNonce = accounts.coordinator.L2.nonce;
+            const fromPath = tree
+                .createProof(fromIndex)
+                .siblings.map((sibling) => numToHex(sibling[0]));
+
+            // update sender state and recompute balance tree
+            accounts.coordinator.L2.debit(value);
+            tree.update(fromIndex, accounts.coordinator.L2.root);
+
+            // compute inclusion proof & values for receiver pre update
+            const toBalance = accounts.alice.L2.balance;
+            const toPath = tree
+                .createProof(2) // index of bob
+                .siblings.map((sibling) => numToHex(sibling[0]));
+            
+            // update receiver state and recompute balance tree
+            accounts.alice.L2.credit(value);
+            tree.update(2, accounts.alice.L2.root);
+
+            // compute tx leaf
+            let from = accounts.coordinator.L2.getPubkey();
+            let to = accounts.alice.L2.getPubkey();
+            const txData = [
+                ...from,
+                BigInt(fromIndex), // fromIndex
+                ...to,
+                fromNonce, // nonce
+                value, // amount
+                tokenType // tokenType
+            ];
+
+            // compute tx in tx tree inclusion proof
+            const half = txData.length / 2;
+            let front = poseidon(txData.slice(0, half));
+            let back = poseidon(txData.slice(half));
+            const leaf = _poseidon(front, back);
+            txTree.insert(leaf);
+
+            // sign the tx leaf
+            const signature = Array.from(await accounts.coordinator.L2.sign(leaf));
+
+            // add data to input array
+            input.from_pubkeys = input.from_pubkeys.concat(from)
+            input.to_pubkeys = input.to_pubkeys.concat(to)
+            input.amount.push(value);
+            input.from_bals.push(fromBalance);
+            input.from_indeces.push(fromIndex);
+            input.from_nonces.push(fromNonce);
+            input.from_token_types.push(tokenType);
+            input.to_nonces.push(accounts.alice.L2.nonce);
+            input.to_bals.push(toBalance);
+            input.to_token_types.push(tokenType);
+            input.from_paths = input.from_paths.concat(fromPath);
+            input.to_paths = input.to_paths.concat(toPath);
+            input.signatures = input.signatures.concat(signature);
+
             console.log("input: ", input)
         });
+
+        it("Roll up transaction batch onchain", async () => {
+            // compute tx paths
+            for (let i = 0; i < 4; i++) {
+                const txPath = txTree
+                    .createProof(i) // index of bob
+                    .siblings.map((sibling) => numToHex(sibling[0]));
+                input.tx_paths = input.tx_paths.concat(txPath);
+            }
+
+            // set tx root and output root
+            input.txRoot = txTree.root;
+            input.nextRoot = tree.root;
+
+            console.log("input: ", input)
+        })
     })
     describe("Withdraw", async () => {
 
