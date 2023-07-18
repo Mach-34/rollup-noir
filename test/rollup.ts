@@ -44,10 +44,12 @@ describe("Test Noir Rollup", async () => {
         it("deposit: sequencer", async () => {
             // insert sequencer account (not neccessary but why not)
             const pubkey = accounts.coordinator.L2.getPubkey();
-            const tx = rollup.deposit(pubkey, 0, 0, { from: accounts.coordinator.L1.address });
-            await expect(tx).to.emit(rollup, 'RequestDeposit').withArgs(pubkey, 0, 0);
+            const tx = rollup.deposit(pubkey, 10000, 1, { from: accounts.coordinator.L1.address, value: 10000n  });
+            await expect(tx).to.emit(rollup, 'RequestDeposit').withArgs(pubkey, 10000, 1);
+            accounts.coordinator.L2.credit(BigInt(10000));
+
             // check integrity of deposit root
-            const data = [...pubkey, 0, 0, 0];
+            const data = [...pubkey, 10000, 0, 1];
             const leafRoot = poseidon(data);
             const sibling = L2Account.emptyRoot(poseidon);
             const expectedRoot = _poseidon([sibling, leafRoot]);
@@ -72,9 +74,7 @@ describe("Test Noir Rollup", async () => {
             await expect(tx).to.emit(rollup, 'RequestDeposit').withArgs(pubkey, 15, 1);
             accounts.bob.L2.credit(BigInt(15));
             // check integrity of deposit root
-            const coordinatorPubkey = accounts.coordinator.L2.getPubkey();
-            const coordinatorLeaf = _poseidon([...coordinatorPubkey, 0, 0, 0]);
-            const sibling = _poseidon([L2Account.emptyRoot(poseidon), coordinatorLeaf])
+            const sibling = _poseidon([L2Account.emptyRoot(poseidon), accounts.coordinator.L2.root])
             const current = _poseidon([accounts.alice.L2.root, accounts.bob.L2.root]);
             const expectedRoot = _poseidon([sibling, current]);
             const depositRoot = (await rollup.describeDeposits())._leaves[0];
@@ -83,11 +83,9 @@ describe("Test Noir Rollup", async () => {
         it('Process batch of 4 account leaves', async () => {
             // construct expected values
             const emptyLeaf = L2Account.emptyRoot(poseidon)
-            const coordinatorPubkey = accounts.coordinator.L2.getPubkey();
-            const coordinatorLeaf = _poseidon([...coordinatorPubkey, 0, 0, 0]);
             tree = new IncrementalMerkleTree(_poseidon, 4, 0);
             tree.insert(F.toObject(emptyLeaf));
-            tree.insert(coordinatorLeaf);
+            tree.insert(accounts.coordinator.L2.root);
             tree.insert(accounts.alice.L2.root);
             tree.insert(accounts.bob.L2.root);
             const expected = {
@@ -107,29 +105,29 @@ describe("Test Noir Rollup", async () => {
         })
     })
     describe("Rollup transactions", async () => {
-        // before(async () => {
-        //     txs = [];
-        //     txTree = new IncrementalMerkleTree(_poseidon, 2, BigInt(0));
-        //     input = {
-        //         from: [], // array of sender eddsa keys
-        //         to: [], // array of receiver eddsa keys x
-        //         amount: [], // array of L2 transaction values
-        //         fromIndex: [], // array of sender index in balance tree
-        //         fromNonce: [], // array of sender nonce for tx
-        //         fromTokenType: [], // array of sender token types
-        //         // signature: [], // array of signatures by sender eddsa key on tx data
-        //         fromBalance: [], // array of sender balances
-        //         toNonce: [], // array of receiver nonce in bal tree
-        //         toBalance: [],
-        //         toTokenType: [],
-        //         // txPath: [],
-        //         fromPath: [],
-        //         toPath: [],
-        //         // txRoot: undefined,
-        //         prevRoot: tree.root,
-        //         nextRoot: undefined
-        //     }
-        // })
+        before(async () => {
+            txs = [];
+            txTree = new IncrementalMerkleTree(_poseidon, 2, BigInt(0));
+            input = {
+                from: [], // array of sender eddsa keys
+                to: [], // array of receiver eddsa keys x
+                amount: [], // array of L2 transaction values
+                fromIndex: [], // array of sender index in balance tree
+                fromNonce: [], // array of sender nonce for tx
+                fromTokenType: [], // array of sender token types
+                // signature: [], // array of signatures by sender eddsa key on tx data
+                fromBalance: [], // array of sender balances
+                toNonce: [], // array of receiver nonce in bal tree
+                toBalance: [],
+                toTokenType: [],
+                // txPath: [],
+                fromPath: [],
+                toPath: [],
+                // txRoot: undefined,
+                prevRoot: tree.root,
+                nextRoot: undefined
+            }
+        })
 
         xit('Alice --{200}--> Bob', async () => {
             // compute inclusion proof & update sender in balance tree 
