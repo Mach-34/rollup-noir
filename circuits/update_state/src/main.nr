@@ -6,7 +6,7 @@ use crate::utils::{
     compute_merkle_root_poseidon,
     InclusionProof, 
     leaf_exists, 
-    // leaf_signed, 
+    signed_leaf, 
     Pubkey,
     // Signature,
     tx_leaf_hash, 
@@ -71,6 +71,19 @@ fn main(
             path: [tx_paths[i * 4], tx_paths[i * 4 + 1], tx_paths[i * 4 + 2], tx_paths[i * 4 + 3]], 
             root: tx_root
         });
+
+        let mut signature = [0; 64];
+        for j in 0..64 {
+            signature[j] = signatures[i*64 + j];
+        }
+
+        let pubkey = Pubkey {
+            x: from_pubkeys[i * 2],
+            y: from_pubkeys[i * 2 + 1]
+        };
+
+        signed_leaf(tx_leaf, pubkey, signature)
+
         // leaf_signed(tx_leaf, from, tx_signature);
 
         // // Check tx sender balance exists
@@ -90,6 +103,7 @@ fn main(
         //     ], 
         //     root: bal_root
         // });
+        
 
         // // Check sufficient balance
         // assert(from_bals[i] >= amount[i] );

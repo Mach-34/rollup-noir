@@ -48,10 +48,10 @@ module.exports = async ({ run, ethers, network, deployments }) => {
     //     from: operator.address,
     //     log: true
     // })
-    // const { address: wsvAddress } = await deployments.deploy('WithdrawSignatureVerifier', {
-    //     from: operator.address,
-    //     log: true
-    // })
+    const { address: wsvAddress } = await deployments.deploy('WithdrawVerifier', {
+        from: operator.address,
+        log: true
+    })
 
     // // deploy token registry
     const { address: registryAddress } = await deployments.deploy('TokenRegistry', {
@@ -64,7 +64,7 @@ module.exports = async ({ run, ethers, network, deployments }) => {
         from: operator.address,
         args: [
             // [usvAddress, wsvAddress, registryAddress],
-            [registryAddress, registryAddress, registryAddress],
+            [registryAddress, wsvAddress, registryAddress],
             depths,
             0,
             zeroCache
