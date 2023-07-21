@@ -403,11 +403,19 @@ describe("Test Noir Rollup", async () => {
             }
 
             // set tx root and output root and format values to noir friendly format
+            input.amount = input.amount.map(amount => numToHex(amount));
+            input.signatures = input.signatures.map(amount => numToHex(amount))
             input.bal_root = numToHex(input.bal_root);
             input.from_bals = input.from_bals.map(bal => numToHex(bal));
+            input.from_nonces = input.from_nonces.map(bal => numToHex(bal));
+            input.from_indeces = input.from_indeces.map(amount => numToHex(amount));
             input.from_pubkeys = input.from_pubkeys.map(key => numToHex(key));
             input.to_bals = input.to_bals.map(bal => numToHex(bal));
+            input.to_indeces = input.to_indeces.map(amount => numToHex(amount));
+            input.to_nonces = input.to_nonces.map(bal => numToHex(bal));
             input.to_pubkeys = input.to_pubkeys.map(key => numToHex(key));
+            input.from_token_types = input.from_token_types.map(amount => numToHex(amount));
+            input.to_token_types = input.to_token_types.map(amount => numToHex(amount));
             input.tx_root = numToHex(txTree.root);
             input.next_root = numToHex(tree.root);
 
