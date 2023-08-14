@@ -30,8 +30,8 @@ fn main(
     to_nonces: [Field; 4],
     to_paths: [Field; 16],
     to_token_types: [Field; 4], 
-    tx_paths: [Field; 16],
-    signatures: [u8; 256],
+    tx_paths: [Field; 8],
+    // signatures: [u8; 256],
     tx_root: pub Field
 ) -> pub Field {
     
